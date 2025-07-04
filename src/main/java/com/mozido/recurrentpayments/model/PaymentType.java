@@ -6,5 +6,5 @@ package com.mozido.recurrentpayments.model;
 
 public enum PaymentType {
     SCHEDULED,
-    RECURRING
+    RECURRENT
 }

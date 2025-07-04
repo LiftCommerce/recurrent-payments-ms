@@ -6,7 +6,9 @@ import com.mozido.recurrentpayments.model.PaymentType;
 import com.mozido.recurrentpayments.model.request.MozidoTrxRequest;
 import com.mozido.recurrentpayments.model.request.ScheduledRecurrentPaymentRequest;
 import com.mozido.recurrentpayments.model.response.ScheduledRecurrentPaymentResponse;
-import com.mozido.recurrentpayments.repository.ScheduledRecurrentPaymentRepository;
+import com.mozido.recurrentpayments.repository.Filters.ScheduledRecurrentPaymentFilter;
+import com.mozido.recurrentpayments.repository.ScheduledRecurrentPaymentFilterRepository;
+import com.mozido.recurrentpayments.repository.interfaces.ScheduledRecurrentPaymentJpaRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,7 +18,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Created by Rafael Richards on 06/25.
@@ -26,17 +27,39 @@ import java.util.stream.Collectors;
 public class ScheduledRecurrentPaymentBs {
 
 
-    private ScheduledRecurrentPaymentRepository scheduledRecurrentPaymentRepository;
+    private ScheduledRecurrentPaymentFilterRepository scheduledRecurrentPaymentFilterRepository;
+    private ScheduledRecurrentPaymentJpaRepository scheduledRecurrentPaymentJpaRepository;
+
 
     @Autowired
-    public ScheduledRecurrentPaymentBs(ScheduledRecurrentPaymentRepository repository) {
-        this.scheduledRecurrentPaymentRepository = repository;
+    public ScheduledRecurrentPaymentBs(ScheduledRecurrentPaymentFilterRepository scheduledRecurrentPaymentFilterRepository,
+                                       ScheduledRecurrentPaymentJpaRepository scheduledRecurrentPaymentJpaRepository)
+    {
+        this.scheduledRecurrentPaymentFilterRepository = scheduledRecurrentPaymentFilterRepository;
+        this.scheduledRecurrentPaymentJpaRepository = scheduledRecurrentPaymentJpaRepository;
     }
 
     public ScheduledRecurrentPaymentResponse create(MozidoTrxRequest mozidoTrxRequest, ScheduledRecurrentPaymentRequest request) {
-        ScheduledRecurrentPayment entity = new ScheduledRecurrentPayment();
-        BeanUtils.copyProperties(request, entity);
-        ScheduledRecurrentPayment saved = scheduledRecurrentPaymentRepository.save(entity);
+        ScheduledRecurrentPayment newEntity = new ScheduledRecurrentPayment();
+
+        newEntity.setTenantName(request.tenantName);
+        newEntity.setUserId(request.userId);
+        newEntity.setAmount(request.amount);
+        newEntity.setStartDate(request.startDate);
+        newEntity.setEndDate(request.endDate);
+        newEntity.setEndAfter(request.endAfter);
+        newEntity.setType(request.type);
+        newEntity.setFrequency(request.frequency);
+        newEntity.setStatus(request.status);
+        newEntity.setCancelUserId(request.cancelUserId);
+        newEntity.setCancelDateTime(request.cancelDateTime);
+        newEntity.setUserAccepted(request.userAccepted);
+        newEntity.setUserDecline(request.userDecline);
+        newEntity.setUserSuppressReminders(request.userSuppressReminders);
+        newEntity.setPendingSenderApproval(request.pendingSenderApproval);
+        newEntity.setLastProcessedDate(request.lastProcessedDate);
+        newEntity.setNotes(request.notes);
+        ScheduledRecurrentPayment saved = scheduledRecurrentPaymentJpaRepository.save(newEntity);
 
         ScheduledRecurrentPaymentResponse response = new ScheduledRecurrentPaymentResponse();
         BeanUtils.copyProperties(saved, response);
@@ -44,10 +67,26 @@ public class ScheduledRecurrentPaymentBs {
     }
 
     public ScheduledRecurrentPaymentResponse update(MozidoTrxRequest mozidoTrxRequest, long id, ScheduledRecurrentPaymentRequest request) {
-        ScheduledRecurrentPayment entity = scheduledRecurrentPaymentRepository.findById(id)
+        ScheduledRecurrentPayment updatedEntity = scheduledRecurrentPaymentJpaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("ScheduledRecurrentPayment not found"));
-        BeanUtils.copyProperties(request, entity);
-        ScheduledRecurrentPayment saved = scheduledRecurrentPaymentRepository.save(entity);
+        updatedEntity.setTenantName(request.tenantName);
+        updatedEntity.setUserId(request.userId);
+        updatedEntity.setAmount(request.amount);
+        updatedEntity.setStartDate(request.startDate);
+        updatedEntity.setEndDate(request.endDate);
+        updatedEntity.setEndAfter(request.endAfter);
+        updatedEntity.setType(request.type);
+        updatedEntity.setFrequency(request.frequency);
+        updatedEntity.setStatus(request.status);
+        updatedEntity.setCancelUserId(request.cancelUserId);
+        updatedEntity.setCancelDateTime(request.cancelDateTime);
+        updatedEntity.setUserAccepted(request.userAccepted);
+        updatedEntity.setUserDecline(request.userDecline);
+        updatedEntity.setUserSuppressReminders(request.userSuppressReminders);
+        updatedEntity.setPendingSenderApproval(request.pendingSenderApproval);
+        updatedEntity.setLastProcessedDate(request.lastProcessedDate);
+        updatedEntity.setNotes(request.notes);
+        ScheduledRecurrentPayment saved = scheduledRecurrentPaymentJpaRepository.save(updatedEntity);
 
         ScheduledRecurrentPaymentResponse response = new ScheduledRecurrentPaymentResponse();
         BeanUtils.copyProperties(saved, response);
@@ -55,27 +94,38 @@ public class ScheduledRecurrentPaymentBs {
     }
 
     public ScheduledRecurrentPaymentResponse get(MozidoTrxRequest mozidoTrxRequest, long id) {
-        ScheduledRecurrentPayment entity = scheduledRecurrentPaymentRepository.findById(id)
+        ScheduledRecurrentPayment savedEntity = scheduledRecurrentPaymentJpaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("ScheduledRecurrentPayment not found"));
         ScheduledRecurrentPaymentResponse response = new ScheduledRecurrentPaymentResponse();
-        BeanUtils.copyProperties(entity, response);
+        response.setId(savedEntity.getId());
+        response.setTenantName(savedEntity.getTenantName());
+        response.setUserId(savedEntity.getUserId());
+        response.setAmount(savedEntity.getAmount());
+        response.setStartDate(savedEntity.getStartDate());
+        response.setEndDate(savedEntity.getEndDate());
+        response.setEndAfter(savedEntity.getEndAfter());
+        response.setType(savedEntity.getType());
+        response.setFrequency(savedEntity.getFrequency());
+        response.setStatus(savedEntity.getStatus());
+        response.setCancelUserId(savedEntity.getCancelUserId());
+        response.setCancelDateTime(savedEntity.getCancelDateTime());
+        response.setUserAccepted(savedEntity.isUserAccepted());
+        response.setUserDecline(savedEntity.isUserDecline());
+        response.setUserSuppressReminders(savedEntity.isUserSuppressReminders());
+        response.setPendingSenderApproval(savedEntity.isPendingSenderApproval());
+        response.setLastProcessedDate(savedEntity.getLastProcessedDate());
+        response.setNotes(savedEntity.getNotes());
         return response;
     }
 
-    public Page<ScheduledRecurrentPaymentResponse> findByFilters(String userId, PaymentStatus status,
-                                                                 LocalDate startDate, LocalDate endDate,
-                                                                 Pageable pageable) {
-        Page<ScheduledRecurrentPayment> results = scheduledRecurrentPaymentRepository.findByFilters(userId, status, startDate, endDate, pageable);
-        return results.map(entity -> {
-            ScheduledRecurrentPaymentResponse response = new ScheduledRecurrentPaymentResponse();
-            BeanUtils.copyProperties(entity, response);
-            return response;
-        });
+    public Page<ScheduledRecurrentPayment> findByFilters(ScheduledRecurrentPaymentFilter filter, Pageable pageable) {
+        return scheduledRecurrentPaymentFilterRepository.findByFilters(filter, pageable);
     }
 
 
+
     public void processDuePayments(LocalDate today) {
-        List<ScheduledRecurrentPayment> payments = scheduledRecurrentPaymentRepository.findByStatus(PaymentStatus.ACTIVE);
+        List<ScheduledRecurrentPayment> payments = scheduledRecurrentPaymentJpaRepository.findByStatus(PaymentStatus.ACTIVE);
 
         for (ScheduledRecurrentPayment p : payments)
         {
@@ -86,7 +136,7 @@ public class ScheduledRecurrentPaymentBs {
                 } catch (Exception e) {
                     handlePaymentFailure(p, e.getMessage());
                 }
-                scheduledRecurrentPaymentRepository.save(p);
+                scheduledRecurrentPaymentJpaRepository.save(p);
             }
         }
     }

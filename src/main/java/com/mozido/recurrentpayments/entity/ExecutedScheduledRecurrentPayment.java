@@ -2,13 +2,9 @@ package com.mozido.recurrentpayments.entity;
 
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.mozido.recurrentpayments.model.PaymentFrequency;
-import com.mozido.recurrentpayments.model.PaymentStatus;
 import com.mozido.recurrentpayments.model.PaymentTransactionStatus;
-import com.mozido.recurrentpayments.model.PaymentType;
 import jakarta.persistence.*;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 
 /**
@@ -31,7 +27,10 @@ public class ExecutedScheduledRecurrentPayment {
     private LocalDate executionDate;
     private boolean success;
     private int retries;
+
+    @Enumerated(EnumType.STRING)
     private PaymentTransactionStatus transactionStatus;
+
     private String errorMessage;
 
     public long getId() {
