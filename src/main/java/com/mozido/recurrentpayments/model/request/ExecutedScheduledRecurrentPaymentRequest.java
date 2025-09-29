@@ -5,12 +5,12 @@ import com.mozido.recurrentpayments.model.PaymentTransactionStatus;
 import java.time.LocalDate;
 
 public class ExecutedScheduledRecurrentPaymentRequest {
-    public long scheduledRecurrentPaymentId;
-    public LocalDate executionDate;
-    public boolean success;
-    public int retries;
-    public PaymentTransactionStatus transactionStatus;
-    public String errorMessage;
+    private long scheduledRecurrentPaymentId;
+    private LocalDate executionDate;
+    private boolean success;
+    private int retries;
+    private PaymentTransactionStatus transactionStatus;
+    private String errorMessage;
 
     public long getScheduledRecurrentPaymentId() {
         return scheduledRecurrentPaymentId;

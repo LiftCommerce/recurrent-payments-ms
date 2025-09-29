@@ -2,6 +2,7 @@ package com.mozido.recurrentpayments.model.request;
 
 import com.mozido.recurrentpayments.model.PaymentFrequency;
 import com.mozido.recurrentpayments.model.PaymentStatus;
+import com.mozido.recurrentpayments.model.PaymentTransactionType;
 import com.mozido.recurrentpayments.model.PaymentType;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -11,23 +12,28 @@ import java.time.LocalDate;
  */
 
 public class ScheduledRecurrentPaymentRequest {
-    public String tenantName;
-    public String userId;
-    public BigDecimal amount;
-    public LocalDate startDate;
-    public LocalDate endDate;
-    public int endAfter;
-    public PaymentType type;
-    public PaymentFrequency frequency;
-    public PaymentStatus status;
-    public String cancelUserId;
-    public LocalDate cancelDateTime;
-    public boolean userAccepted;
-    public boolean userDecline;
-    public boolean userSuppressReminders;
-    public boolean pendingSenderApproval;
-    public LocalDate lastProcessedDate;
-    public String notes;
+    private String tenantName;
+    private String userId;
+    private String svaId;
+    private String username;
+    private String companyCode;
+    private BigDecimal amount;
+    private LocalDate startDate;
+    private LocalDate endDate;
+    private int endAfter;
+    private PaymentType type;
+    private PaymentTransactionType paymentTransactionType;
+    private PaymentFrequency frequency;
+    private PaymentStatus status;
+    private String cancelUserId;
+    private LocalDate cancelDateTime;
+    private boolean userAccepted;
+    private boolean userDecline;
+    private boolean userSuppressReminders;
+    private boolean pendingSenderApproval;
+    private LocalDate lastProcessedDate;
+    private String notes;
+    private String currencyCode;
 
     public String getTenantName() {
         return tenantName;
@@ -163,5 +169,45 @@ public class ScheduledRecurrentPaymentRequest {
 
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+
+    public PaymentTransactionType getPaymentTransactionType() {
+        return paymentTransactionType;
+    }
+
+    public void setPaymentTransactionType(PaymentTransactionType paymentTransactionType) {
+        this.paymentTransactionType = paymentTransactionType;
+    }
+
+    public String getSvaId() {
+        return svaId;
+    }
+
+    public void setSvaId(String svaId) {
+        this.svaId = svaId;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getCompanyCode() {
+        return companyCode;
+    }
+
+    public void setCompanyCode(String companyCode) {
+        this.companyCode = companyCode;
+    }
+
+    public String getCurrencyCode() {
+        return currencyCode;
+    }
+
+    public void setCurrencyCode(String currencyCode) {
+        this.currencyCode = currencyCode;
     }
 }

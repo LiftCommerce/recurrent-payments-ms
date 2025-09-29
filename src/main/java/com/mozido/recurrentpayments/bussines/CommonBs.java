@@ -1,0 +1,136 @@
+package com.mozido.recurrentpayments.bussines;
+
+import com.mozido.recurrentpayments.entity.Setting;
+import com.mozido.recurrentpayments.exception.ControllerException;
+import com.mozido.recurrentpayments.model.Language;
+import com.mozido.recurrentpayments.model.response.OauthTokenResponse;
+import com.mozido.recurrentpayments.repository.interfaces.SettingJpaRepository;
+import org.apache.http.entity.ContentType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
+
+import java.time.Instant;
+import java.util.Optional;
+
+import static com.mozido.recurrentpayments.exception.ErrorResponses.TENANT_SETTING_NOT_EXIST;
+
+@Component
+public class CommonBs
+{
+    @Value("${v1.mozido.switch.oauth.internal.url}")
+    private String authInternalUrl;
+
+    @Value("${v1.base.end.point}")
+    private String v1MozidoSwitchEndPoint;
+
+    private SettingJpaRepository settingJpaRepository;
+
+    Logger logger = LoggerFactory.getLogger(CommonBs.class);
+
+    @Value("${v1.tyk.api.key.name}")
+    private String tykApiKeyName;
+
+    @Value("${v1.tyk.api.key.value}")
+    private String tykApiKeyValue;
+
+    @Autowired
+    public CommonBs(SettingJpaRepository settingJpaRepository)
+    {
+        this.settingJpaRepository = settingJpaRepository;
+    }
+
+    public String getToken(String tenantName, String interfaceName) throws ControllerException {
+
+        Optional<Setting> optSetting = settingJpaRepository.findOneByTenantNameAndInterfaceName(tenantName, interfaceName);
+        if (!optSetting.isPresent())
+        {
+            throw new ControllerException(TENANT_SETTING_NOT_EXIST, Language.ENGLISH);
+        }
+
+        Setting setting = optSetting.get();
+        if (null != setting.getLastSignOn())
+        {
+            Instant instant = Instant.now();
+            long timeStampSeconds = instant.getEpochSecond();
+            Long tokenExpiryTime = setting.getTokenExpiresAtSeconds() != null ? setting.getTokenExpiresAtSeconds() : 0;
+            if ((timeStampSeconds + 3) < tokenExpiryTime) {
+                logger.info("Token has not expired");
+                return setting.getToken();
+            }
+            else
+            {
+                logger.info("Token has expired.. getting new token");
+                return this.obtainToken(setting);
+            }
+        }
+        else
+        {
+            if (setting.getIsEncrypted())
+            {
+                setting.decrypt();
+                return this.obtainToken(setting);
+            }
+            else
+            {
+                String token = this.obtainToken(setting);
+                setting.encrypt();
+                settingJpaRepository.saveAndFlush(setting);
+                return token;
+            }
+        }
+    }
+
+    public String obtainToken(Setting setting) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type", ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
+        headers.add(tykApiKeyName, tykApiKeyValue);
+        headers.add("tenantName", setting.getTenantName());
+        if (setting.getIsEncrypted())
+            setting.decrypt();
+
+        String body = "grant_type=password&username=" + (setting.getUsername()) +
+                "&password=" + (setting.getPassword());
+
+        HttpEntity<String> httpRequest = new HttpEntity<>(body, headers);
+
+        RestTemplate restTemplate = new RestTemplate();
+        try
+        {
+            ResponseEntity<OauthTokenResponse> response = null;
+
+            logger.info("------------------/////////////////////////-------------------" + body );
+            logger.info("URL: " + authInternalUrl);
+            try
+            {
+                response = restTemplate.postForEntity(authInternalUrl, httpRequest, OauthTokenResponse.class);
+
+            }
+            catch (Exception e)
+            {
+                logger.info(e.toString());
+            }
+
+            setting.setLastSignOn(response.getBody().getLastSignonTimestamp());
+            setting.setExpiresIn(response.getBody().getExpiresIn());
+            setting.setToken(response.getBody().getAccessToken());
+            setting.setRefreshToken(response.getBody().getRefreshToken());
+            setting.setTokenExpiresAtSeconds(Instant.now().getEpochSecond() + response.getBody().getExpiresIn());
+            settingJpaRepository.saveAndFlush(setting);
+
+            return response.getBody().getAccessToken();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+}

@@ -2,29 +2,36 @@ package com.mozido.recurrentpayments.repository.Filters;
 
 import com.mozido.recurrentpayments.model.PaymentFrequency;
 import com.mozido.recurrentpayments.model.PaymentStatus;
+import com.mozido.recurrentpayments.model.PaymentTransactionType;
 import com.mozido.recurrentpayments.model.PaymentType;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public class ScheduledRecurrentPaymentFilter {
+
     private String tenantName;
     private String userId;
+    private String svaId;
+    private String username;
+    private String companyCode;
     private BigDecimal amount;
     private LocalDate startDate;
     private LocalDate endDate;
-    private Integer endAfter;
+    private int endAfter;
     private PaymentType type;
+    private PaymentTransactionType paymentTransactionType;
     private PaymentFrequency frequency;
     private PaymentStatus status;
     private String cancelUserId;
     private LocalDate cancelDateTime;
-    private Boolean userAccepted;
-    private Boolean userDecline;
-    private Boolean userSuppressReminders;
-    private Boolean pendingSenderApproval;
+    private boolean userAccepted;
+    private boolean userDecline;
+    private boolean userSuppressReminders;
+    private boolean pendingSenderApproval;
     private LocalDate lastProcessedDate;
     private String notes;
+    private String currencyCode;
 
     public String getTenantName() {
         return tenantName;
@@ -160,5 +167,81 @@ public class ScheduledRecurrentPaymentFilter {
 
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+
+    public PaymentTransactionType getPaymentTransactionType() {
+        return paymentTransactionType;
+    }
+
+    public void setPaymentTransactionType(PaymentTransactionType paymentTransactionType) {
+        this.paymentTransactionType = paymentTransactionType;
+    }
+
+    public String getSvaId() {
+        return svaId;
+    }
+
+    public void setSvaId(String svaId) {
+        this.svaId = svaId;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getCompanyCode() {
+        return companyCode;
+    }
+
+    public void setCompanyCode(String companyCode) {
+        this.companyCode = companyCode;
+    }
+
+    public void setEndAfter(int endAfter) {
+        this.endAfter = endAfter;
+    }
+
+    public boolean isUserAccepted() {
+        return userAccepted;
+    }
+
+    public void setUserAccepted(boolean userAccepted) {
+        this.userAccepted = userAccepted;
+    }
+
+    public boolean isUserDecline() {
+        return userDecline;
+    }
+
+    public void setUserDecline(boolean userDecline) {
+        this.userDecline = userDecline;
+    }
+
+    public boolean isUserSuppressReminders() {
+        return userSuppressReminders;
+    }
+
+    public void setUserSuppressReminders(boolean userSuppressReminders) {
+        this.userSuppressReminders = userSuppressReminders;
+    }
+
+    public boolean isPendingSenderApproval() {
+        return pendingSenderApproval;
+    }
+
+    public void setPendingSenderApproval(boolean pendingSenderApproval) {
+        this.pendingSenderApproval = pendingSenderApproval;
+    }
+
+    public String getCurrencyCode() {
+        return currencyCode;
+    }
+
+    public void setCurrencyCode(String currencyCode) {
+        this.currencyCode = currencyCode;
     }
 }

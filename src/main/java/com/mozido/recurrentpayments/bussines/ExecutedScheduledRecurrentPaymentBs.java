@@ -22,6 +22,10 @@ public class ExecutedScheduledRecurrentPaymentBs {
     private ExecutedScheduledRecurrentPaymentJpaRepository executedScheduledRecurrentPaymentJpaRepository;
     private ScheduledRecurrentPaymentJpaRepository scheduledRecurrentPaymentJpaRepository;
 
+    public ExecutedScheduledRecurrentPaymentBs()
+    {
+    }
+
     @Autowired
     public ExecutedScheduledRecurrentPaymentBs(ScheduledRecurrentPaymentJpaRepository scheduledRecurrentPaymentJpaRepository,
                                                ExecutedScheduledRecurrentPaymentFilterRepository executedScheduledRecurrentPaymentFilterRepository,
@@ -33,22 +37,21 @@ public class ExecutedScheduledRecurrentPaymentBs {
     }
 
     public ExecutedScheduledRecurrentPaymentResponse create(ExecutedScheduledRecurrentPaymentRequest request) {
-        ScheduledRecurrentPayment scheduled = scheduledRecurrentPaymentJpaRepository.findById(request.scheduledRecurrentPaymentId)
+        ScheduledRecurrentPayment scheduled = scheduledRecurrentPaymentJpaRepository.findById(request.getScheduledRecurrentPaymentId())
                 .orElseThrow(() -> new RuntimeException("ScheduledRecurrentPayment not found"));
 
-        ExecutedScheduledRecurrentPayment entity = new ExecutedScheduledRecurrentPayment();
-        entity.setScheduledRecurrentPayment(scheduled);
-        entity.setExecutionDate(request.executionDate);
-        entity.setSuccess(request.success);
-        entity.setRetries(request.retries);
-        entity.setTransactionStatus(request.transactionStatus);
-        entity.setErrorMessage(request.errorMessage);
+        ExecutedScheduledRecurrentPayment newEntity = new ExecutedScheduledRecurrentPayment();
+        newEntity.setScheduledRecurrentPayment(scheduled);
+        newEntity.setExecutionDate(request.getExecutionDate());
+        newEntity.setSuccess(request.isSuccess());
+        newEntity.setRetries(request.getRetries());
+        newEntity.setTransactionStatus(request.getTransactionStatus());
+        newEntity.setErrorMessage(request.getErrorMessage());
 
-        ExecutedScheduledRecurrentPayment saved = executedScheduledRecurrentPaymentJpaRepository.save(entity);
+        ExecutedScheduledRecurrentPayment saved = executedScheduledRecurrentPaymentJpaRepository.save(newEntity);
 
         ExecutedScheduledRecurrentPaymentResponse response = new ExecutedScheduledRecurrentPaymentResponse();
         BeanUtils.copyProperties(saved, response);
-        response.scheduledRecurrentPaymentId = scheduled.getId();
         return response;
     }
 
@@ -56,21 +59,20 @@ public class ExecutedScheduledRecurrentPaymentBs {
         ExecutedScheduledRecurrentPayment entity = executedScheduledRecurrentPaymentJpaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("ExecutedScheduledRecurrentPayment not found"));
 
-        ScheduledRecurrentPayment scheduled = scheduledRecurrentPaymentJpaRepository.findById(request.scheduledRecurrentPaymentId)
+        ScheduledRecurrentPayment scheduled = scheduledRecurrentPaymentJpaRepository.findById(request.getScheduledRecurrentPaymentId())
                 .orElseThrow(() -> new RuntimeException("ScheduledRecurrentPayment not found"));
 
         entity.setScheduledRecurrentPayment(scheduled);
-        entity.setExecutionDate(request.executionDate);
-        entity.setSuccess(request.success);
-        entity.setRetries(request.retries);
-        entity.setTransactionStatus(request.transactionStatus);
-        entity.setErrorMessage(request.errorMessage);
+        entity.setExecutionDate(request.getExecutionDate());
+        entity.setSuccess(request.isSuccess());
+        entity.setRetries(request.getRetries());
+        entity.setTransactionStatus(request.getTransactionStatus());
+        entity.setErrorMessage(request.getErrorMessage());
 
         ExecutedScheduledRecurrentPayment saved = executedScheduledRecurrentPaymentJpaRepository.save(entity);
 
         ExecutedScheduledRecurrentPaymentResponse response = new ExecutedScheduledRecurrentPaymentResponse();
         BeanUtils.copyProperties(saved, response);
-        response.scheduledRecurrentPaymentId = scheduled.getId();
         return response;
     }
 

@@ -37,14 +37,6 @@ public class ExecutedScheduledRecurrentPayment {
         return id;
     }
 
-    public ScheduledRecurrentPayment getPaymentId() {
-        return scheduledRecurrentPayment;
-    }
-
-    public void setPaymentId(ScheduledRecurrentPayment paymentId) {
-        this.scheduledRecurrentPayment = paymentId;
-    }
-
     public LocalDate getExecutionDate() {
         return executionDate;
     }

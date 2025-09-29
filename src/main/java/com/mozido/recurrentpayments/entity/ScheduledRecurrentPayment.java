@@ -3,6 +3,7 @@ package com.mozido.recurrentpayments.entity;
 
 
 import com.mozido.recurrentpayments.model.PaymentStatus;
+import com.mozido.recurrentpayments.model.PaymentTransactionType;
 import com.mozido.recurrentpayments.model.PaymentType;
 import com.mozido.recurrentpayments.model.PaymentFrequency;
 import jakarta.persistence.*;
@@ -23,6 +24,10 @@ public class ScheduledRecurrentPayment {
 
     private String tenantName;
     private String userId;
+    private String svaId;
+    private String username;
+    private String companyCode;
+
     private BigDecimal amount;
     private LocalDate startDate;
     private LocalDate endDate;
@@ -30,6 +35,9 @@ public class ScheduledRecurrentPayment {
 
     @Enumerated(EnumType.STRING)
     private PaymentType type;
+
+    @Enumerated(EnumType.STRING)
+    private PaymentTransactionType paymentTransactionType;
 
     @Enumerated(EnumType.STRING)
     private PaymentFrequency frequency;
@@ -47,6 +55,7 @@ public class ScheduledRecurrentPayment {
 
     private LocalDate lastProcessedDate;
     private String notes;
+    private String currencyCode;
 
     public long getId() {
         return id;
@@ -187,5 +196,45 @@ public class ScheduledRecurrentPayment {
 
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+
+    public PaymentTransactionType getPaymentTransactionType() {
+        return paymentTransactionType;
+    }
+
+    public void setPaymentTransactionType(PaymentTransactionType paymentTransactionType) {
+        this.paymentTransactionType = paymentTransactionType;
+    }
+
+    public String getSvaId() {
+        return svaId;
+    }
+
+    public void setSvaId(String svaId) {
+        this.svaId = svaId;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getCompanyCode() {
+        return companyCode;
+    }
+
+    public void setCompanyCode(String companyCode) {
+        this.companyCode = companyCode;
+    }
+
+    public String getCurrencyCode() {
+        return currencyCode;
+    }
+
+    public void setCurrencyCode(String currencyCode) {
+        this.currencyCode = currencyCode;
     }
 }

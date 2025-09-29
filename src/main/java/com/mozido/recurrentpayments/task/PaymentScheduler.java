@@ -6,17 +6,18 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-@Component
 
 /**
  * Created by Rafael Richards on 06/25.
  */
 
+@Component
 public class PaymentScheduler {
     @Autowired
     private ScheduledRecurrentPaymentBs scheduledRecurrentPaymentBs;
 
-    @Scheduled(cron = "0 0 9 * * *") // 9:00 AM todos los días
+//    @Scheduled(cron = "0 0 9 * * *") // 9:00 AM todos los días
+    @Scheduled(cron = "0 * * * * *")
     public void runPaymentJob() {
         scheduledRecurrentPaymentBs.processDuePayments(LocalDate.now());
     }

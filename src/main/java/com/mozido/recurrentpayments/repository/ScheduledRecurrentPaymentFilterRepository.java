@@ -13,7 +13,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,6 +38,15 @@ public class ScheduledRecurrentPaymentFilterRepository {
         if (filter.getUserId() != null) {
             predicates.add(cb.equal(root.get("userId"), filter.getUserId()));
         }
+        if (filter.getSvaId() != null) {
+            predicates.add(cb.equal(root.get("svaId"), filter.getSvaId()));
+        }
+        if (filter.getUsername() != null) {
+            predicates.add(cb.equal(root.get("username"), filter.getUsername()));
+        }
+        if (filter.getCompanyCode() != null) {
+            predicates.add(cb.equal(root.get("companyCode"), filter.getCompanyCode()));
+        }
         if (filter.getAmount() != null) {
             predicates.add(cb.equal(root.get("amount"), filter.getAmount()));
         }
@@ -53,6 +61,9 @@ public class ScheduledRecurrentPaymentFilterRepository {
         }
         if (filter.getType() != null) {
             predicates.add(cb.equal(root.get("type"), filter.getType()));
+        }
+        if (filter.getPaymentTransactionType() != null) {
+            predicates.add(cb.equal(root.get("paymentTransactionType"), filter.getPaymentTransactionType()));
         }
         if (filter.getFrequency() != null) {
             predicates.add(cb.equal(root.get("frequency"), filter.getFrequency()));
@@ -83,6 +94,9 @@ public class ScheduledRecurrentPaymentFilterRepository {
         }
         if (filter.getNotes() != null) {
             predicates.add(cb.like(root.get("notes"), "%" + filter.getNotes() + "%"));
+        }
+        if (filter.getCurrencyCode() != null) {
+            predicates.add(cb.equal(root.get("currencyCode"), filter.getCurrencyCode()));
         }
 
         cq.where(predicates.toArray(new Predicate[0]));
