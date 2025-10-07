@@ -17,7 +17,7 @@ public class ScheduledRecurrentPaymentRequest {
     private String svaId;
     private String username;
     private String companyCode;
-    private BigDecimal amount;
+    private Double amount;
     private LocalDate startDate;
     private LocalDate endDate;
     private int endAfter;
@@ -51,11 +51,11 @@ public class ScheduledRecurrentPaymentRequest {
         this.userId = userId;
     }
 
-    public BigDecimal getAmount() {
+    public Double getAmount() {
         return amount;
     }
 
-    public void setAmount(BigDecimal amount) {
+    public void setAmount(Double amount) {
         this.amount = amount;
     }
 

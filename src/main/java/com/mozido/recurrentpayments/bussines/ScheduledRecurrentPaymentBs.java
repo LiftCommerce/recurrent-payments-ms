@@ -3,11 +3,13 @@ package com.mozido.recurrentpayments.bussines;
 import com.mozido.recurrentpayments.entity.ExecutedScheduledRecurrentPayment;
 import com.mozido.recurrentpayments.entity.ScheduledRecurrentPayment;
 import com.mozido.recurrentpayments.exception.ControllerException;
+import com.mozido.recurrentpayments.exception.ErrorResponses;
 import com.mozido.recurrentpayments.model.PaymentStatus;
 import com.mozido.recurrentpayments.model.PaymentTransactionStatus;
 import com.mozido.recurrentpayments.model.PaymentTransactionType;
 import com.mozido.recurrentpayments.model.PaymentType;
 import com.mozido.recurrentpayments.model.request.MozidoTrxRequest;
+import com.mozido.recurrentpayments.model.request.PersonToMerchantRequest;
 import com.mozido.recurrentpayments.model.request.PersonToPersonRequest;
 import com.mozido.recurrentpayments.model.request.ScheduledRecurrentPaymentRequest;
 import com.mozido.recurrentpayments.model.response.BaseResponse;
@@ -17,6 +19,8 @@ import com.mozido.recurrentpayments.repository.Filters.ScheduledRecurrentPayment
 import com.mozido.recurrentpayments.repository.ScheduledRecurrentPaymentFilterRepository;
 import com.mozido.recurrentpayments.repository.interfaces.ExecutedScheduledRecurrentPaymentJpaRepository;
 import com.mozido.recurrentpayments.repository.interfaces.ScheduledRecurrentPaymentJpaRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -48,10 +52,16 @@ public class ScheduledRecurrentPaymentBs {
     @Value("${fundz.user.send.money.url}")
     private String fundzUserSendMoneyUrl;
 
+    @Value("${fundz.merchant.payment.M2M.url}")
+    private String fundzMerchantPaymentM2MUrl;
+
     private ScheduledRecurrentPaymentFilterRepository scheduledRecurrentPaymentFilterRepository;
     private ScheduledRecurrentPaymentJpaRepository scheduledRecurrentPaymentJpaRepository;
     private ExecutedScheduledRecurrentPaymentJpaRepository executedScheduledRecurrentPaymentJpaRepository;
     private CommonBs commonBs;
+
+    Logger logger = LoggerFactory.getLogger(ScheduledRecurrentPaymentBs.class);
+
 
     @Autowired
     public ScheduledRecurrentPaymentBs(ScheduledRecurrentPaymentFilterRepository scheduledRecurrentPaymentFilterRepository,
@@ -235,8 +245,7 @@ public class ScheduledRecurrentPaymentBs {
         System.out.printf("✅ Pago procesado: %s %.2f\n", p.getUserId(), p.getAmount());
     }
 
-    private BaseResponse sendP2P(String tenantName, String token, ScheduledRecurrentPayment payment)
-    {
+    private BaseResponse sendP2P(String tenantName, String token, ScheduledRecurrentPayment payment) throws ControllerException {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.add("Authorization", token);
@@ -245,9 +254,15 @@ public class ScheduledRecurrentPaymentBs {
 
         headers.add("P2P", "P2P");
 
-        // TODO hay que crear el PersonToPerson request
+        // PersonToPerson request creation
         PersonToPersonRequest request = new PersonToPersonRequest();
-        request.setAmount();
+        request.setAmount(payment.getAmount());
+        request.setCurrencyCode(payment.getCurrencyCode());
+        request.setUsername(payment.getUsername());
+        request.setSubject("Automatic Payment P2P");
+        request.setSvaId(payment.getSvaId());
+        request.setTenantName(payment.getTenantName());
+
         HttpEntity requestEntity = new HttpEntity<>(request, headers);
 
         RestTemplate restTemplate = new RestTemplate();
@@ -278,30 +293,30 @@ public class ScheduledRecurrentPaymentBs {
         }
     }
 
-    private BaseResponse sendP2M(String tenantName, String token, ScheduledRecurrentPayment payment)
-    {
+    private BaseResponse sendP2M(String tenantName, String token, ScheduledRecurrentPayment payment) throws ControllerException {
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", request.getToken());
-        headers.add("TenantName", request.getTenantName());
+        headers.add("Authorization", token);
+        headers.add("TenantName", tenantName);
         headers.add("api-key", apiKey);
 
-        if (deviceId != null)
-            headers.add("DEVICE_ID", deviceId);
-        if (timeZone != null)
-            headers.add("TIMEZONE", timeZone);
-        if (deviceOs != null)
-            headers.add("DEVICE_OS", deviceOs);
-        if (ipAdd != null)
-            headers.add("x-forwarded-for", ipAdd);
-
         RestTemplate restTemplate = new RestTemplate();
-        // TODO hay que crear el PersonToMerchant request
+
+        // PersonToMerchant request creation
+        PersonToMerchantRequest request = new PersonToMerchantRequest();
+        request.setAmount(payment.getAmount());
+        request.setCurrencyCode(payment.getCurrencyCode());
+        request.setCompanyCode(payment.getCompanyCode());
+        request.setSubject("Automatic Payment P2M");
+        request.setIsM2MTransfer(true);
+        request.setTenantName(payment.getTenantName());
+        request.setContainerId(payment.getSvaId());
+
         HttpEntity requestEntity = new HttpEntity<>(request, headers);
 
         try
         {
             ResponseEntity<BaseResponse> response = restTemplate.exchange(fundzBaseUrl + fundzMerchantPaymentM2MUrl , HttpMethod.POST, requestEntity, BaseResponse.class);
-            logger.info("pay2MerchantM2M: " + response.getBody());
+            logger.info("sendP2M: " + response.getBody());
             return response.getBody();
         }
         catch (Exception e)

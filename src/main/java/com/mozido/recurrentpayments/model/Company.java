@@ -1,0 +1,233 @@
+package com.mozido.recurrentpayments.model;
+
+import java.util.Date;
+import java.util.List;
+
+public class Company {
+
+    private long id;
+    private String tenantName;
+    private String userUUID;
+    private String svaId;
+    private String companyName;
+    private String companyCode;
+    private String imgUrl;
+    private Date createdDate;
+    private Integer currencyCode;
+    private Integer companyId;
+    private String country;
+    private String email;
+    private String defaultCampaign;
+    private Boolean isCampaignActive;
+    private Boolean isAsura;
+    private String telephone;
+    private String webSite;
+
+    private Boolean hasParent;
+    private Boolean isHealthCare;
+    private Integer healthCareId;
+    private String googlePlaceId;
+
+    private String timezone;
+    private String description;
+
+    private String profileItems;
+
+    public Company() {
+        this.createdDate = new Date();
+    }
+
+
+    public Boolean getIsHealthCare() {
+        return isHealthCare;
+    }
+
+    public void setIsHealthCare(Boolean healthCare) {
+        isHealthCare = healthCare;
+    }
+
+    public Boolean getHasParent() {
+        return hasParent;
+    }
+
+    public void setHasParent(Boolean hasParent) {
+        this.hasParent = hasParent;
+    }
+
+    public Integer getHealthCareId() {
+        return healthCareId;
+    }
+
+    public void setHealthCareId(Integer healthCareId) {
+        this.healthCareId = healthCareId;
+    }
+
+    public String getCompanyName() {
+        return companyName;
+    }
+
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName;
+    }
+
+    public String getCompanyCode() {
+        return companyCode;
+    }
+
+    public void setCompanyCode(String companyCode) {
+        this.companyCode = companyCode;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public String getTenantName() {
+        return tenantName;
+    }
+
+    public void setTenantName(String tenantName) {
+        this.tenantName = tenantName;
+    }
+
+    public String getUserUUID() {
+        return userUUID;
+    }
+
+    public void setUserUUID(String userUUID) {
+        this.userUUID = userUUID;
+    }
+
+    public String getSvaId() {
+        return svaId;
+    }
+
+    public void setSvaId(String svaId) {
+        this.svaId = svaId;
+    }
+
+    public Date getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(Date createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public String getImgUrl() {
+        return imgUrl;
+    }
+
+    public void setImgUrl(String imgUrl) {
+        this.imgUrl = imgUrl;
+    }
+
+
+    public Integer getCurrencyCode() {
+        return currencyCode;
+    }
+
+    public void setCurrencyCode(Integer currencyCode) {
+        this.currencyCode = currencyCode;
+    }
+
+    public Integer getCompanyId() {
+        return companyId;
+    }
+
+    public void setCompanyId(Integer companyId) {
+        this.companyId = companyId;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getDefaultCampaign() {
+        return defaultCampaign;
+    }
+
+    public void setDefaultCampaign(String defaultCampaign) {
+        this.defaultCampaign = defaultCampaign;
+    }
+
+    public Boolean getIsCampaignActive() {
+        return isCampaignActive;
+    }
+
+    public void setIsCampaignActive(Boolean campaignActive) {
+        isCampaignActive = campaignActive;
+    }
+
+    public Boolean getIsAsura() {
+        return isAsura;
+    }
+
+    public void setIsAsura(Boolean asura) {
+        isAsura = asura;
+    }
+
+    public String getTelephone() {
+        return telephone;
+    }
+
+    public void setTelephone(String telephone) {
+        this.telephone = telephone;
+    }
+
+    public String getWebSite() {
+        return webSite;
+    }
+
+    public void setWebSite(String webSite) {
+        this.webSite = webSite;
+    }
+
+    public String getTimezone() {
+        return timezone;
+    }
+
+    public void setTimezone(String timezone) {
+        this.timezone = timezone;
+    }
+
+    public String getGooglePlaceId() {
+        return googlePlaceId;
+    }
+
+    public void setGooglePlaceId(String googlePlaceId) {
+        this.googlePlaceId = googlePlaceId;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getProfileItems() {
+        return profileItems;
+    }
+
+    public void setProfileItems(String profileItems) {
+        this.profileItems = profileItems;
+    }
+}
