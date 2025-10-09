@@ -27,9 +27,6 @@ public class CommonBs
     @Value("${v1.mozido.switch.oauth.internal.url}")
     private String authInternalUrl;
 
-    @Value("${v1.base.end.point}")
-    private String v1MozidoSwitchEndPoint;
-
     private SettingJpaRepository settingJpaRepository;
 
     Logger logger = LoggerFactory.getLogger(CommonBs.class);
