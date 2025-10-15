@@ -144,9 +144,3 @@ auth.base.url=http://api-dev.liftcommerce.com/auth/
 auth.change.password.url=api/myinfo/changePassword
 auth.reset.password.url=api/reset/password
 
-rcc.admin.username=rcc_fundz_admin
-rcc.admin.password=FundzAdmin1234!
-
-management.endpoints.web.exposure.include=health,info
-management.server.port=8086
-
