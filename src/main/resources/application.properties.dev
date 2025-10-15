@@ -16,7 +16,6 @@ spring.datasource.driverClassName=org.postgresql.Driver
 spring.datasource.url=jdbc:postgresql://${DB_HOST}:${DB_PORT}/payments
 spring.datasource.username=${DB_USERNAME}
 spring.datasource.password=${DB_PASSWORD}
-
 server.api.img.real.path=${CATALINA_HOME}/webapps/img/
 server.api.img.url=${SERVER_URL}/img/
 spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation=true
@@ -147,4 +146,7 @@ auth.reset.password.url=api/reset/password
 
 rcc.admin.username=rcc_fundz_admin
 rcc.admin.password=FundzAdmin1234!
+
+management.endpoints.web.exposure.include=health,info
+management.server.port=8086
 
