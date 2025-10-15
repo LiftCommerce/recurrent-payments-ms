@@ -1,45 +1,27 @@
 package com.mozido.recurrentpayments.swagger;
 
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Contact;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.info.License;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import springfox.bean.validators.configuration.BeanValidatorPluginsConfiguration;
-import springfox.documentation.builders.PathSelectors;
-import springfox.documentation.builders.RequestHandlerSelectors;
-import springfox.documentation.service.ApiInfo;
-import springfox.documentation.service.Contact;
-import springfox.documentation.spi.DocumentationType;
-import springfox.documentation.spring.web.plugins.Docket;
-import java.util.Collections;
 
 /**
  * Created by Rafael Richards on 06/25.
  */
 
 @Configuration
-@Import(BeanValidatorPluginsConfiguration.class)
 public class SwaggerConfig {
 
     @Bean
-    public Docket apiDocket() {
-        return new Docket(DocumentationType.SWAGGER_2)
-                .select()
-                .apis(RequestHandlerSelectors.basePackage("com.mozido.recurrentpayments"))
-                .paths(PathSelectors.any())
-                .build()
-                .apiInfo(getApiInfo());
-    }
-
-    private ApiInfo getApiInfo() {
-        return new ApiInfo(
-                "TITLE",
-                "DESCIPRTION",
-                "VERSION",
-                "TERMS OF SERVICE URL",
-                new Contact("NAME","URL","EMAIL"),
-                "LICENSE",
-                "LICENSE URL",
-                Collections.emptyList()
-        );
+    public OpenAPI apiInfo() {
+        return new OpenAPI()
+                .info(new Info().title("RECURRENT-PAYMENTS-MS")
+                        .description("DESCRIPTION OF THE API")
+                        .version("API VERSION")
+                        .termsOfService("TERMS OF SERVICE URL")
+                        .contact(new Contact().name("NAME").url("URL").email("EMAIL"))
+                        .license(new License().name("LICENSE").url("LICENSE URL")));
     }
 }
