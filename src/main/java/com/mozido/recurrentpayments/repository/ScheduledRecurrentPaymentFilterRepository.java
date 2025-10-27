@@ -24,81 +24,14 @@ public class ScheduledRecurrentPaymentFilterRepository {
 
     public Page<ScheduledRecurrentPayment> findByFilters(
             ScheduledRecurrentPaymentFilter filter,
-            Pageable pageable
-    ) {
+            Pageable pageable) {
+
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+
         CriteriaQuery<ScheduledRecurrentPayment> cq = cb.createQuery(ScheduledRecurrentPayment.class);
         Root<ScheduledRecurrentPayment> root = cq.from(ScheduledRecurrentPayment.class);
 
-        List<Predicate> predicates = new ArrayList<>();
-
-        if (filter.getTenantName() != null) {
-            predicates.add(cb.equal(root.get("tenantName"), filter.getTenantName()));
-        }
-        if (filter.getUserId() != null) {
-            predicates.add(cb.equal(root.get("userId"), filter.getUserId()));
-        }
-        if (filter.getSvaId() != null) {
-            predicates.add(cb.equal(root.get("svaId"), filter.getSvaId()));
-        }
-        if (filter.getUsername() != null) {
-            predicates.add(cb.equal(root.get("username"), filter.getUsername()));
-        }
-        if (filter.getCompanyCode() != null) {
-            predicates.add(cb.equal(root.get("companyCode"), filter.getCompanyCode()));
-        }
-        if (filter.getAmount() != null) {
-            predicates.add(cb.equal(root.get("amount"), filter.getAmount()));
-        }
-        if (filter.getStartDate() != null) {
-            predicates.add(cb.equal(root.get("startDate"), filter.getStartDate()));
-        }
-        if (filter.getEndDate() != null) {
-            predicates.add(cb.equal(root.get("endDate"), filter.getEndDate()));
-        }
-        if (filter.getEndAfter() != null) {
-            predicates.add(cb.equal(root.get("endAfter"), filter.getEndAfter()));
-        }
-        if (filter.getType() != null) {
-            predicates.add(cb.equal(root.get("type"), filter.getType()));
-        }
-        if (filter.getPaymentTransactionType() != null) {
-            predicates.add(cb.equal(root.get("paymentTransactionType"), filter.getPaymentTransactionType()));
-        }
-        if (filter.getFrequency() != null) {
-            predicates.add(cb.equal(root.get("frequency"), filter.getFrequency()));
-        }
-        if (filter.getStatus() != null) {
-            predicates.add(cb.equal(root.get("status"), filter.getStatus()));
-        }
-        if (filter.getCancelUserId() != null) {
-            predicates.add(cb.equal(root.get("cancelUserId"), filter.getCancelUserId()));
-        }
-        if (filter.getCancelDateTime() != null) {
-            predicates.add(cb.equal(root.get("cancelDateTime"), filter.getCancelDateTime()));
-        }
-        if (filter.getUserAccepted() != null) {
-            predicates.add(cb.equal(root.get("userAccepted"), filter.getUserAccepted()));
-        }
-        if (filter.getUserDecline() != null) {
-            predicates.add(cb.equal(root.get("userDecline"), filter.getUserDecline()));
-        }
-        if (filter.getUserSuppressReminders() != null) {
-            predicates.add(cb.equal(root.get("userSuppressReminders"), filter.getUserSuppressReminders()));
-        }
-        if (filter.getPendingSenderApproval() != null) {
-            predicates.add(cb.equal(root.get("pendingSenderApproval"), filter.getPendingSenderApproval()));
-        }
-        if (filter.getLastProcessedDate() != null) {
-            predicates.add(cb.equal(root.get("lastProcessedDate"), filter.getLastProcessedDate()));
-        }
-        if (filter.getNotes() != null) {
-            predicates.add(cb.like(root.get("notes"), "%" + filter.getNotes() + "%"));
-        }
-        if (filter.getCurrencyCode() != null) {
-            predicates.add(cb.equal(root.get("currencyCode"), filter.getCurrencyCode()));
-        }
-
+        List<Predicate> predicates = buildPredicates(cb, root, filter);
         cq.where(predicates.toArray(new Predicate[0]));
         cq.orderBy(cb.desc(root.get("startDate")));
 
@@ -108,9 +41,90 @@ public class ScheduledRecurrentPaymentFilterRepository {
 
         CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
         Root<ScheduledRecurrentPayment> countRoot = countQuery.from(ScheduledRecurrentPayment.class);
-        countQuery.select(cb.count(countRoot)).where(predicates.toArray(new Predicate[0]));
+        List<Predicate> countPredicates = buildPredicates(cb, countRoot, filter);
+        countQuery.select(cb.count(countRoot)).where(countPredicates.toArray(new Predicate[0]));
+
         Long total = entityManager.createQuery(countQuery).getSingleResult();
 
         return new PageImpl<>(query.getResultList(), pageable, total);
+    }
+
+    private List<Predicate> buildPredicates(
+            CriteriaBuilder cb,
+            Root<ScheduledRecurrentPayment> root,
+            ScheduledRecurrentPaymentFilter filter) {
+
+        List<Predicate> predicates = new ArrayList<>();
+
+        if (filter.getTenantName() != null)
+            predicates.add(cb.equal(root.get("tenantName"), filter.getTenantName()));
+
+        if (filter.getUserId() != null)
+            predicates.add(cb.equal(root.get("userId"), filter.getUserId()));
+
+        if (filter.getSvaId() != null)
+            predicates.add(cb.equal(root.get("svaId"), filter.getSvaId()));
+
+        if (filter.getBasketId() != null)
+            predicates.add(cb.equal(root.get("basketId"), filter.getBasketId()));
+
+        if (filter.getUsername() != null)
+            predicates.add(cb.equal(root.get("username"), filter.getUsername()));
+
+        if (filter.getCompanyCode() != null)
+            predicates.add(cb.equal(root.get("companyCode"), filter.getCompanyCode()));
+
+        if (filter.getAmount() != null)
+            predicates.add(cb.equal(root.get("amount"), filter.getAmount()));
+
+        if (filter.getStartDate() != null)
+            predicates.add(cb.equal(root.get("startDate"), filter.getStartDate()));
+
+        if (filter.getEndDate() != null)
+            predicates.add(cb.equal(root.get("endDate"), filter.getEndDate()));
+
+        if (filter.getEndAfter() != null && filter.getEndAfter() > 0)
+            predicates.add(cb.equal(root.get("endAfter"), filter.getEndAfter()));
+
+        if (filter.getType() != null)
+            predicates.add(cb.equal(root.get("type"), filter.getType()));
+
+        if (filter.getPaymentTransactionType() != null)
+            predicates.add(cb.equal(root.get("paymentTransactionType"), filter.getPaymentTransactionType()));
+
+        if (filter.getFrequency() != null)
+            predicates.add(cb.equal(root.get("frequency"), filter.getFrequency()));
+
+        if (filter.getStatus() != null)
+            predicates.add(cb.equal(root.get("status"), filter.getStatus()));
+
+        if (filter.getCancelUserId() != null)
+            predicates.add(cb.equal(root.get("cancelUserId"), filter.getCancelUserId()));
+
+        if (filter.getCancelDateTime() != null)
+            predicates.add(cb.equal(root.get("cancelDateTime"), filter.getCancelDateTime()));
+
+        if (filter.getUserAccepted() != null)
+            predicates.add(cb.equal(root.get("userAccepted"), filter.getUserAccepted()));
+
+        if (filter.getUserDecline() != null)
+            predicates.add(cb.equal(root.get("userDecline"), filter.getUserDecline()));
+
+        if (filter.getUserSuppressReminders() != null)
+            predicates.add(cb.equal(root.get("userSuppressReminders"), filter.getUserSuppressReminders()));
+
+        if (filter.getPendingSenderApproval() != null)
+            predicates.add(cb.equal(root.get("pendingSenderApproval"), filter.getPendingSenderApproval()));
+
+        if (filter.getLastProcessedDate() != null)
+            predicates.add(cb.equal(root.get("lastProcessedDate"), filter.getLastProcessedDate()));
+
+        if (filter.getNotes() != null)
+            predicates.add(cb.like(root.get("notes"), "%" + filter.getNotes() + "%"));
+
+        if (filter.getCurrencyCode() != null)
+            predicates.add(cb.equal(root.get("currencyCode"), filter.getCurrencyCode()));
+
+        return predicates;
     }
 }

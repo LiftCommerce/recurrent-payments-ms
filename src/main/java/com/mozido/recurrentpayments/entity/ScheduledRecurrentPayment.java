@@ -7,7 +7,7 @@ import com.mozido.recurrentpayments.model.PaymentTransactionType;
 import com.mozido.recurrentpayments.model.PaymentType;
 import com.mozido.recurrentpayments.model.PaymentFrequency;
 import jakarta.persistence.*;
-import java.math.BigDecimal;
+
 import java.time.LocalDate;
 
 /**
@@ -25,6 +25,7 @@ public class ScheduledRecurrentPayment {
     private String tenantName;
     private String userId;
     private String svaId;
+    private String basketId;
     private String username;
     private String companyCode;
 
@@ -236,5 +237,13 @@ public class ScheduledRecurrentPayment {
 
     public void setCurrencyCode(String currencyCode) {
         this.currencyCode = currencyCode;
+    }
+
+    public String getBasketId() {
+        return basketId;
+    }
+
+    public void setBasketId(String basketId) {
+        this.basketId = basketId;
     }
 }

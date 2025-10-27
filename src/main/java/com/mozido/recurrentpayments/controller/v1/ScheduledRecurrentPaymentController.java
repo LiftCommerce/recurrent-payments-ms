@@ -8,6 +8,7 @@ import com.mozido.recurrentpayments.model.PaymentStatus;
 import com.mozido.recurrentpayments.model.PaymentType;
 import com.mozido.recurrentpayments.model.request.MozidoTrxRequest;
 import com.mozido.recurrentpayments.model.request.ScheduledRecurrentPaymentRequest;
+import com.mozido.recurrentpayments.model.response.RecurrentPaymentsPageResponse;
 import com.mozido.recurrentpayments.model.response.ScheduledRecurrentPaymentResponse;
 import com.mozido.recurrentpayments.repository.Filters.ScheduledRecurrentPaymentFilter;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.text.ParseException;
 import java.time.LocalDate;
 
 /**
@@ -47,8 +49,7 @@ public class ScheduledRecurrentPaymentController {
     public ResponseEntity<ScheduledRecurrentPaymentResponse> create(
             @Parameter(description = "Tenant name, If you have your tenant use it, if not we provide one.") @RequestHeader(value = "tenantName") String tenantName,
             @Parameter(description = "Authorization token") @RequestHeader(value = "Authorization") String token,
-            @RequestBody ScheduledRecurrentPaymentRequest request) throws ControllerException
-    {
+            @RequestBody ScheduledRecurrentPaymentRequest request) throws Exception {
         MozidoTrxRequest mozidoTrxRequest = new MozidoTrxRequest(tenantName, token, null);
         return ResponseEntity.status(HttpStatus.CREATED).body(scheduledRecurrentPaymentBs.create(mozidoTrxRequest, request));
     }
@@ -76,45 +77,13 @@ public class ScheduledRecurrentPaymentController {
         return ResponseEntity.ok(scheduledRecurrentPaymentBs.get(mozidoTrxRequest, id));
     }
 
-    @GetMapping
-    public ResponseEntity<Page<ScheduledRecurrentPayment>> findByFilters(
-            @RequestParam(required = false) String tenantName,
-            @RequestParam(required = false) String userId,
-            @RequestParam(required = false) BigDecimal amount,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-            @RequestParam(required = false) Integer endAfter,
-            @RequestParam(required = false) PaymentType type,
-            @RequestParam(required = false) PaymentFrequency frequency,
-            @RequestParam(required = false) PaymentStatus status,
-            @RequestParam(required = false) String cancelUserId,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate cancelDateTime,
-            @RequestParam(required = false) Boolean userAccepted,
-            @RequestParam(required = false) Boolean userDecline,
-            @RequestParam(required = false) Boolean userSuppressReminders,
-            @RequestParam(required = false) Boolean pendingSenderApproval,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate lastProcessedDate,
-            @RequestParam(required = false) String notes,
+    @PostMapping("/search")
+    @Operation(summary = "Get a Scheduled Recurrent Payments by Filters")
+    public ResponseEntity<RecurrentPaymentsPageResponse> findByFilters(
+            @RequestBody ScheduledRecurrentPaymentFilter filterRequest,
             Pageable pageable)
     {
-        ScheduledRecurrentPaymentFilter filter = new ScheduledRecurrentPaymentFilter();
-        filter.setTenantName(tenantName);
-        filter.setUserId(userId);
-        filter.setAmount(amount);
-        filter.setStartDate(startDate);
-        filter.setEndDate(endDate);
-        filter.setEndAfter(endAfter);
-        filter.setType(type);
-        filter.setFrequency(frequency);
-        filter.setStatus(status);
-        filter.setCancelUserId(cancelUserId);
-        filter.setCancelDateTime(cancelDateTime);
-        filter.setUserAccepted(userAccepted);
-        filter.setUserDecline(userDecline);
-        filter.setUserSuppressReminders(userSuppressReminders);
-        filter.setPendingSenderApproval(pendingSenderApproval);
-        filter.setLastProcessedDate(lastProcessedDate);
-        filter.setNotes(notes);
-        return ResponseEntity.ok(scheduledRecurrentPaymentBs.findByFilters(filter, pageable));
+        Page<ScheduledRecurrentPayment> page = scheduledRecurrentPaymentBs.findByFilters(filterRequest, pageable);
+        return ResponseEntity.ok(new RecurrentPaymentsPageResponse(page));
     }
 }

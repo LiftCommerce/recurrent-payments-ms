@@ -2,7 +2,10 @@ package com.mozido.recurrentpayments.bussines;
 
 import com.mozido.recurrentpayments.entity.Setting;
 import com.mozido.recurrentpayments.exception.ControllerException;
+import com.mozido.recurrentpayments.exception.ErrorResponses;
 import com.mozido.recurrentpayments.model.Language;
+import com.mozido.recurrentpayments.model.request.MozidoTrxRequest;
+import com.mozido.recurrentpayments.model.response.GetMyUserResponse;
 import com.mozido.recurrentpayments.model.response.OauthTokenResponse;
 import com.mozido.recurrentpayments.repository.interfaces.SettingJpaRepository;
 import org.apache.http.entity.ContentType;
@@ -10,13 +13,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import java.text.ParseException;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Optional;
 
 import static com.mozido.recurrentpayments.exception.ErrorResponses.TENANT_SETTING_NOT_EXIST;
@@ -36,6 +41,15 @@ public class CommonBs
 
     @Value("${v1.tyk.api.key.value}")
     private String tykApiKeyValue;
+
+    @Value("${fundz.base.url}")
+    private String fundzBaseUrl;
+
+    @Value("${fundz.user.get.my.user.info.url}")
+    private String fundzUserGetMyUserInfoUrl;
+
+    @Value("${v1.tyk.api.key}")
+    private String apiKey;
 
     @Autowired
     public CommonBs(SettingJpaRepository settingJpaRepository)
@@ -130,4 +144,45 @@ public class CommonBs
         }
     }
 
+    public GetMyUserResponse getMyUserInfo(MozidoTrxRequest request, String companyId) throws ControllerException, ParseException {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        GetMyUserResponse getMyUserResponse;
+        headers.add("Authorization", request.getToken());
+        headers.add("TenantName", request.getTenantName());
+        headers.add("api-key", apiKey);
+
+        RestTemplate restTemplate = new RestTemplate();
+        HttpEntity requestEntity = new HttpEntity<>(request, headers);
+
+        if (null != companyId) {
+            headers.add("companyId", companyId);
+        }
+
+        try
+        {
+            ResponseEntity<GetMyUserResponse> response = restTemplate.exchange(fundzBaseUrl + fundzUserGetMyUserInfoUrl, HttpMethod.GET, requestEntity, GetMyUserResponse.class);
+            getMyUserResponse = response.getBody();
+        }
+        catch (Exception e)
+        {
+            if (e instanceof ControllerException) {
+                throw e;
+            }
+            if (e instanceof RestClientException) {
+                ErrorResponses errorResponses =  new ErrorResponses(HttpStatus.valueOf(500),
+                        500,((RestClientException) e).getMessage());
+                throw new ControllerException(e.getMessage(), errorResponses);
+            }
+            if(e instanceof HttpClientErrorException)
+            {
+                ErrorResponses errorResponses =  new ErrorResponses((HttpStatus) ((HttpClientErrorException) e).getStatusCode(),
+                        ((HttpClientErrorException) e).getRawStatusCode(),((HttpClientErrorException) e).getMessage());
+                throw new ControllerException(((HttpClientErrorException) e).getMessage(), errorResponses);
+            }
+            e.printStackTrace();
+            return null;
+        }
+        return getMyUserResponse;
+    }
 }

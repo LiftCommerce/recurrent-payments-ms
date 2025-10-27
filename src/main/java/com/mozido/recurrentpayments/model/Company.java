@@ -1,11 +1,20 @@
 package com.mozido.recurrentpayments.model;
 
+
+import jakarta.persistence.*;
+import org.hibernate.loader.ast.internal.CacheEntityLoaderHelper;
+
 import java.util.Date;
 import java.util.List;
+
+/**
+ * Created by Orlando on 04/21.
+ */
 
 public class Company {
 
     private long id;
+
     private String tenantName;
     private String userUUID;
     private String svaId;
@@ -19,7 +28,6 @@ public class Company {
     private String email;
     private String defaultCampaign;
     private Boolean isCampaignActive;
-    private Boolean isAsura;
     private String telephone;
     private String webSite;
 
@@ -29,11 +37,21 @@ public class Company {
     private String googlePlaceId;
 
     private String timezone;
+
     private String description;
 
     private String profileItems;
 
-    public Company() {
+    private CacheEntityLoaderHelper.EntityStatus status;
+
+    private List<Payment> payments;
+
+    private List<UserCompany> userCompanies;
+
+    private Address addresses;
+
+
+    public Company(){
         this.createdDate = new Date();
     }
 
@@ -110,6 +128,7 @@ public class Company {
         this.svaId = svaId;
     }
 
+
     public Date getCreatedDate() {
         return createdDate;
     }
@@ -117,6 +136,15 @@ public class Company {
     public void setCreatedDate(Date createdDate) {
         this.createdDate = createdDate;
     }
+
+    public List<Payment> getPayments() {
+        return payments;
+    }
+
+    public void setPayments(List<Payment> payments) {
+        this.payments = payments;
+    }
+
 
     public String getImgUrl() {
         return imgUrl;
@@ -175,12 +203,20 @@ public class Company {
         isCampaignActive = campaignActive;
     }
 
-    public Boolean getIsAsura() {
-        return isAsura;
+    public List<UserCompany> getUserCompanies() {
+        return userCompanies;
     }
 
-    public void setIsAsura(Boolean asura) {
-        isAsura = asura;
+    public void setUserCompanies(List<UserCompany> userCompanies) {
+        this.userCompanies = userCompanies;
+    }
+
+    public Address getAddresses() {
+        return addresses;
+    }
+
+    public void setAddresses(Address addresses) {
+        this.addresses = addresses;
     }
 
     public String getTelephone() {
@@ -223,11 +259,43 @@ public class Company {
         this.description = description;
     }
 
+    public CacheEntityLoaderHelper.EntityStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(CacheEntityLoaderHelper.EntityStatus status) {
+        this.status = status;
+    }
+
     public String getProfileItems() {
         return profileItems;
     }
 
     public void setProfileItems(String profileItems) {
         this.profileItems = profileItems;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Company company = (Company) o;
+
+        if (id != company.id) return false;
+        if (tenantName != null ? !tenantName.equals(company.tenantName) : company.tenantName != null) return false;
+        if (companyCode != null ? !companyCode.equals(company.companyCode) : company.companyCode != null) return false;
+        if (companyId != null ? !companyId.equals(company.companyId) : company.companyId != null) return false;
+        return email != null ? email.equals(company.email) : company.email == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (int) (id ^ (id >>> 32));
+        result = 31 * result + (tenantName != null ? tenantName.hashCode() : 0);
+        result = 31 * result + (companyCode != null ? companyCode.hashCode() : 0);
+        result = 31 * result + (companyId != null ? companyId.hashCode() : 0);
+        result = 31 * result + (email != null ? email.hashCode() : 0);
+        return result;
     }
 }

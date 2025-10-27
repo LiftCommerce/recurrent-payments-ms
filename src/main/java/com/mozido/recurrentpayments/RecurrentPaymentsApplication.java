@@ -13,6 +13,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @EnableScheduling
+//@PropertySource("application.properties.dev")
 @PropertySource("file:/usr/local/apache/tomcat/conf/recurrent-payments-ms.properties")
 public class RecurrentPaymentsApplication extends  SpringBootServletInitializer {
 

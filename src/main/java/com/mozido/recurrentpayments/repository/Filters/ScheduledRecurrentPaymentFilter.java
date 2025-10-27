@@ -13,6 +13,7 @@ public class ScheduledRecurrentPaymentFilter {
     private String tenantName;
     private String userId;
     private String svaId;
+    private String basketId;
     private String username;
     private String companyCode;
     private BigDecimal amount;
@@ -243,5 +244,13 @@ public class ScheduledRecurrentPaymentFilter {
 
     public void setCurrencyCode(String currencyCode) {
         this.currencyCode = currencyCode;
+    }
+
+    public String getBasketId() {
+        return basketId;
+    }
+
+    public void setBasketId(String basketId) {
+        this.basketId = basketId;
     }
 }

@@ -15,6 +15,7 @@ public class ScheduledRecurrentPaymentRequest {
     private String tenantName;
     private String userId;
     private String svaId;
+    private String basketId;
     private String username;
     private String companyCode;
     private Double amount;
@@ -209,5 +210,13 @@ public class ScheduledRecurrentPaymentRequest {
 
     public void setCurrencyCode(String currencyCode) {
         this.currencyCode = currencyCode;
+    }
+
+    public String getBasketId() {
+        return basketId;
+    }
+
+    public void setBasketId(String basketId) {
+        this.basketId = basketId;
     }
 }
