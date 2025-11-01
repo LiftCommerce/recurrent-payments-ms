@@ -1,11 +1,8 @@
-package com.mozido.recurrentpayments.controller.v1;
+package com.mozido.recurrentpayments.controller;
 
 import com.mozido.recurrentpayments.bussines.ScheduledRecurrentPaymentBs;
 import com.mozido.recurrentpayments.entity.ScheduledRecurrentPayment;
 import com.mozido.recurrentpayments.exception.ControllerException;
-import com.mozido.recurrentpayments.model.PaymentFrequency;
-import com.mozido.recurrentpayments.model.PaymentStatus;
-import com.mozido.recurrentpayments.model.PaymentType;
 import com.mozido.recurrentpayments.model.request.MozidoTrxRequest;
 import com.mozido.recurrentpayments.model.request.ScheduledRecurrentPaymentRequest;
 import com.mozido.recurrentpayments.model.response.RecurrentPaymentsPageResponse;
@@ -16,15 +13,16 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.text.ParseException;
-import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Rafael Richards on 06/25.
@@ -60,8 +58,7 @@ public class ScheduledRecurrentPaymentController {
             @Parameter(description = "Tenant name, If you have your tenant use it, if not we provide one.") @RequestHeader(value = "tenantName") String tenantName,
             @Parameter(description = "Authorization token") @RequestHeader(value = "Authorization") String token,
             @Parameter(description = "Id") @PathVariable long id,
-            @RequestBody ScheduledRecurrentPaymentRequest request)  throws ControllerException
-    {
+            @RequestBody ScheduledRecurrentPaymentRequest request) throws ControllerException, ParseException {
         MozidoTrxRequest mozidoTrxRequest = new MozidoTrxRequest(tenantName, token, null);
         return ResponseEntity.ok(scheduledRecurrentPaymentBs.update(mozidoTrxRequest, id, request));
     }
@@ -80,10 +77,36 @@ public class ScheduledRecurrentPaymentController {
     @PostMapping("/search")
     @Operation(summary = "Get a Scheduled Recurrent Payments by Filters")
     public ResponseEntity<RecurrentPaymentsPageResponse> findByFilters(
-            @RequestBody ScheduledRecurrentPaymentFilter filterRequest,
-            Pageable pageable)
+            @Parameter(description = "Tenant name, If you have your tenant use it, if not we provide one.") @RequestHeader(value = "tenantName") String tenantName,
+            @Parameter(description = "Authorization token") @RequestHeader(value = "Authorization") String token,
+            @Parameter(description = "Page") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "size") @RequestParam(defaultValue = "10") int size,
+            @Parameter(description = "sort") @RequestParam(defaultValue = "startDate,desc") String[] sort,
+            @RequestBody ScheduledRecurrentPaymentFilter filterRequest)
     {
-        Page<ScheduledRecurrentPayment> page = scheduledRecurrentPaymentBs.findByFilters(filterRequest, pageable);
-        return ResponseEntity.ok(new RecurrentPaymentsPageResponse(page));
+        Pageable pageable = buildPageable(page, size, sort);
+        Page<ScheduledRecurrentPayment> response = scheduledRecurrentPaymentBs.findByFilters(filterRequest, pageable);
+        return ResponseEntity.ok(new RecurrentPaymentsPageResponse(response));
+    }
+
+    private Pageable buildPageable(int page, int size, String[] sortParams) {
+        List<Sort.Order> orders = new ArrayList<>();
+
+        if (sortParams != null) {
+            for (String param : sortParams) {
+                String[] parts = param.split(",");
+                String property = parts[0];
+                Sort.Direction direction = Sort.Direction.ASC; // default value
+
+                if (parts.length > 1) {
+                    direction = Sort.Direction.fromString(parts[1]);
+                }
+
+                orders.add(new Sort.Order(direction, property));
+            }
+        }
+
+        Sort sort = orders.isEmpty() ? Sort.unsorted() : Sort.by(orders);
+        return PageRequest.of(page, size, sort);
     }
 }

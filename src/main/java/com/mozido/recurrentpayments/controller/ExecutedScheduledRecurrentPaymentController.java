@@ -1,4 +1,4 @@
-package com.mozido.recurrentpayments.controller.v1;
+package com.mozido.recurrentpayments.controller;
 
 import com.mozido.recurrentpayments.bussines.ExecutedScheduledRecurrentPaymentBs;
 import com.mozido.recurrentpayments.entity.ExecutedScheduledRecurrentPayment;

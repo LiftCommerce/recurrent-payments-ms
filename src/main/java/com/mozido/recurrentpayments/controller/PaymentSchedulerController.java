@@ -1,4 +1,4 @@
-package com.mozido.recurrentpayments.controller.v1;
+package com.mozido.recurrentpayments.controller;
 
 import com.mozido.recurrentpayments.exception.ControllerException;
 import com.mozido.recurrentpayments.task.PaymentScheduler;
@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/scheduled-recurrent-payments/scheduler")
+@RequestMapping("/scheduler")
 public class PaymentSchedulerController {
 
     @Autowired

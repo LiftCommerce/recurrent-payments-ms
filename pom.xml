@@ -12,7 +12,7 @@
 
     <groupId>com.mozido</groupId>
     <artifactId>recurrent-payments-ms</artifactId>
-    <version>1.0.0</version>
+    <version>1</version>
     <packaging>war</packaging>
     <name>Recurrent Payments MS</name>
     <description>Recurrent Payments microservice</description>
@@ -45,7 +45,7 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Tomcat embebido (usará 10.1.x incluido por Spring Boot) -->
+        <!-- Tomcat embedded -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-tomcat</artifactId>
@@ -77,7 +77,7 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- Utilidades -->
+        <!-- Utilities -->
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>

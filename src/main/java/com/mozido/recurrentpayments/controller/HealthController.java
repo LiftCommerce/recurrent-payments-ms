@@ -1,4 +1,4 @@
-package com.mozido.recurrentpayments.controller.v1;
+package com.mozido.recurrentpayments.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
