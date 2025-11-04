@@ -1,5 +1,6 @@
 package com.mozido.recurrentpayments.bussines;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mozido.recurrentpayments.entity.Setting;
 import com.mozido.recurrentpayments.exception.ControllerException;
 import com.mozido.recurrentpayments.exception.ErrorResponses;
@@ -32,10 +33,6 @@ public class CommonBs
     @Value("${v1.mozido.switch.oauth.internal.url}")
     private String authInternalUrl;
 
-    private SettingJpaRepository settingJpaRepository;
-
-    Logger logger = LoggerFactory.getLogger(CommonBs.class);
-
     @Value("${v1.tyk.api.key.name}")
     private String tykApiKeyName;
 
@@ -50,6 +47,10 @@ public class CommonBs
 
     @Value("${v1.tyk.api.key}")
     private String apiKey;
+
+    private SettingJpaRepository settingJpaRepository;
+
+    Logger logger = LoggerFactory.getLogger(CommonBs.class);
 
     @Autowired
     public CommonBs(SettingJpaRepository settingJpaRepository)
@@ -111,11 +112,10 @@ public class CommonBs
 
         HttpEntity<String> httpRequest = new HttpEntity<>(body, headers);
 
-        RestTemplate restTemplate = new RestTemplate();
         try
         {
             ResponseEntity<OauthTokenResponse> response = null;
-
+            RestTemplate restTemplate = new RestTemplate();
             logger.info("------------------/////////////////////////-------------------" + body );
             logger.info("URL: " + authInternalUrl);
             try
@@ -144,15 +144,14 @@ public class CommonBs
         }
     }
 
-    public GetMyUserResponse getMyUserInfo(MozidoTrxRequest request, String companyId) throws ControllerException, ParseException {
+    public GetMyUserResponse getMyUserInfo(MozidoTrxRequest request, String companyId) throws ControllerException, ParseException, JsonProcessingException {
         HttpHeaders headers = new HttpHeaders();
         headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-        GetMyUserResponse getMyUserResponse;
+        GetMyUserResponse getMyUserResponse = new GetMyUserResponse();
         headers.add("Authorization", request.getToken());
         headers.add("TenantName", request.getTenantName());
         headers.add("api-key", apiKey);
 
-        RestTemplate restTemplate = new RestTemplate();
         HttpEntity requestEntity = new HttpEntity<>(request, headers);
 
         if (null != companyId) {
@@ -161,7 +160,9 @@ public class CommonBs
 
         try
         {
-            ResponseEntity<GetMyUserResponse> response = restTemplate.exchange(fundzBaseUrl + fundzUserGetMyUserInfoUrl, HttpMethod.GET, requestEntity, GetMyUserResponse.class);
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<GetMyUserResponse> response = restTemplate.exchange(fundzBaseUrl + fundzUserGetMyUserInfoUrl, HttpMethod.GET,
+                    requestEntity, GetMyUserResponse.class);
             getMyUserResponse = response.getBody();
         }
         catch (Exception e)

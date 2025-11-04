@@ -1,20 +1,15 @@
 package com.mozido.recurrentpayments.model.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import org.springframework.http.HttpStatus;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class GetMyUserResponse extends BaseResponse {
+public class GetMyUserResponse  {
 
     private UserResponse user;
-    private String catholicDirectoryAccountNumber;
-    private String parishName;
-    private String parishionerId;
-
-    public GetMyUserResponse() {}
-
-    public GetMyUserResponse(UserResponse user) {
-        this.user = user;
-    }
+    private HttpStatus statusCode = HttpStatus.OK;
+    private Integer code = 200;
+    private String msg = "Success";
 
     public UserResponse getUser() {
         return user;
@@ -24,28 +19,28 @@ public class GetMyUserResponse extends BaseResponse {
         this.user = user;
     }
 
-    public String getCatholicDirectoryAccountNumber() {
-        return catholicDirectoryAccountNumber;
+    public HttpStatus getStatusCode() {
+        return statusCode;
     }
 
-    public void setCatholicDirectoryAccountNumber(String catholicDirectoryAccountNumber) {
-        this.catholicDirectoryAccountNumber = catholicDirectoryAccountNumber;
+    public void setStatusCode(HttpStatus statusCode) {
+        this.statusCode = statusCode;
     }
 
-    public String getParishName() {
-        return parishName;
+    public Integer getCode() {
+        return code;
     }
 
-    public void setParishName(String parishName) {
-        this.parishName = parishName;
+    public void setCode(Integer code) {
+        this.code = code;
     }
 
-    public String getParishionerId() {
-        return parishionerId;
+    public String getMsg() {
+        return msg;
     }
 
-    public void setParishionerId(String parishionerId) {
-        this.parishionerId = parishionerId;
+    public void setMsg(String msg) {
+        this.msg = msg;
     }
 }
 

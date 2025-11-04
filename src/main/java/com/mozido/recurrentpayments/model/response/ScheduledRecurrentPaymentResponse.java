@@ -4,7 +4,11 @@ import com.mozido.recurrentpayments.model.PaymentFrequency;
 import com.mozido.recurrentpayments.model.PaymentStatus;
 import com.mozido.recurrentpayments.model.PaymentTransactionType;
 import com.mozido.recurrentpayments.model.PaymentType;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+
 import java.math.BigDecimal;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 
 /**
@@ -26,7 +30,9 @@ public class ScheduledRecurrentPaymentResponse {
     private int endAfter;
     private PaymentType type;
     private PaymentTransactionType paymentTransactionType;
-    private PaymentFrequency frequency;
+    private PaymentFrequency paymentFrequency;
+    private DayOfWeek dayOfWeek;
+    private Integer dayOfMonth;
     private PaymentStatus status;
     private String cancelUserId;
     private LocalDate cancelDateTime;
@@ -102,12 +108,12 @@ public class ScheduledRecurrentPaymentResponse {
         this.type = type;
     }
 
-    public PaymentFrequency getFrequency() {
-        return frequency;
+    public PaymentFrequency getPaymentFrequency() {
+        return paymentFrequency;
     }
 
-    public void setFrequency(PaymentFrequency frequency) {
-        this.frequency = frequency;
+    public void setPaymentFrequency(PaymentFrequency paymentFrequency) {
+        this.paymentFrequency = paymentFrequency;
     }
 
     public PaymentStatus getStatus() {
@@ -228,5 +234,21 @@ public class ScheduledRecurrentPaymentResponse {
 
     public void setBasketId(String basketId) {
         this.basketId = basketId;
+    }
+
+    public DayOfWeek getDayOfWeek() {
+        return dayOfWeek;
+    }
+
+    public void setDayOfWeek(DayOfWeek dayOfWeek) {
+        this.dayOfWeek = dayOfWeek;
+    }
+
+    public Integer getDayOfMonth() {
+        return dayOfMonth;
+    }
+
+    public void setDayOfMonth(Integer dayOfMonth) {
+        this.dayOfMonth = dayOfMonth;
     }
 }

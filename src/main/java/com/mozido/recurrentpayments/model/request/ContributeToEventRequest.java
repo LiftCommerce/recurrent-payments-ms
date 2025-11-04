@@ -19,9 +19,13 @@ public class ContributeToEventRequest extends MozidoTrxRequest {
     @Schema(description = "Amount to contribute")
     private Double amount;
 
-//    @JsonIgnore
     @Schema(description = "SVA where the money will be taked")
     private String svaId;
+
+    public ContributeToEventRequest()
+    {
+
+    }
 
     public ContributeToEventRequest(Double amount, Long eventId, String tenantName, String token) {
         this.setAmount(amount);

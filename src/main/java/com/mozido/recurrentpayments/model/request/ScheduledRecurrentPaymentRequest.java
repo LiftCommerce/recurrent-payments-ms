@@ -5,6 +5,7 @@ import com.mozido.recurrentpayments.model.PaymentStatus;
 import com.mozido.recurrentpayments.model.PaymentTransactionType;
 import com.mozido.recurrentpayments.model.PaymentType;
 import java.math.BigDecimal;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 
 /**
@@ -20,6 +21,8 @@ public class ScheduledRecurrentPaymentRequest {
     private String companyCode;
     private Double amount;
     private LocalDate startDate;
+    private DayOfWeek dayOfWeek;
+    private Integer dayOfMonth;
     private LocalDate endDate;
     private int endAfter;
     private PaymentType type;
@@ -218,5 +221,21 @@ public class ScheduledRecurrentPaymentRequest {
 
     public void setBasketId(String basketId) {
         this.basketId = basketId;
+    }
+
+    public DayOfWeek getDayOfWeek() {
+        return dayOfWeek;
+    }
+
+    public void setDayOfWeek(DayOfWeek dayOfWeek) {
+        this.dayOfWeek = dayOfWeek;
+    }
+
+    public Integer getDayOfMonth() {
+        return dayOfMonth;
+    }
+
+    public void setDayOfMonth(Integer dayOfMonth) {
+        this.dayOfMonth = dayOfMonth;
     }
 }

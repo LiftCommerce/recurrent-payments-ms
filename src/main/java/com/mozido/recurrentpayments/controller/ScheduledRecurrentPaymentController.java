@@ -1,5 +1,6 @@
 package com.mozido.recurrentpayments.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mozido.recurrentpayments.bussines.ScheduledRecurrentPaymentBs;
 import com.mozido.recurrentpayments.entity.ScheduledRecurrentPayment;
 import com.mozido.recurrentpayments.exception.ControllerException;
@@ -58,7 +59,7 @@ public class ScheduledRecurrentPaymentController {
             @Parameter(description = "Tenant name, If you have your tenant use it, if not we provide one.") @RequestHeader(value = "tenantName") String tenantName,
             @Parameter(description = "Authorization token") @RequestHeader(value = "Authorization") String token,
             @Parameter(description = "Id") @PathVariable long id,
-            @RequestBody ScheduledRecurrentPaymentRequest request) throws ControllerException, ParseException {
+            @RequestBody ScheduledRecurrentPaymentRequest request) throws ControllerException, ParseException, JsonProcessingException {
         MozidoTrxRequest mozidoTrxRequest = new MozidoTrxRequest(tenantName, token, null);
         return ResponseEntity.ok(scheduledRecurrentPaymentBs.update(mozidoTrxRequest, id, request));
     }

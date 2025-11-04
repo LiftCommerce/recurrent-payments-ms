@@ -1,5 +1,6 @@
 package com.mozido.recurrentpayments.bussines;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mozido.recurrentpayments.entity.ExecutedScheduledRecurrentPayment;
 import com.mozido.recurrentpayments.entity.ScheduledRecurrentPayment;
 import com.mozido.recurrentpayments.exception.ControllerException;
@@ -84,7 +85,7 @@ public class ScheduledRecurrentPaymentBs {
         ScheduledRecurrentPayment newEntity = new ScheduledRecurrentPayment();
         ScheduledRecurrentPaymentResponse response = new ScheduledRecurrentPaymentResponse();
         GetMyUserResponse myUserResponse = commonBs.getMyUserInfo(mozidoTrxRequest, null);
-        if(myUserResponse.getUser() != null)
+        if(myUserResponse != null)
         {
             newEntity.setTenantName(mozidoTrxRequest.getTenantName());
             newEntity.setUserId(myUserResponse.getUser().getUserUUID());
@@ -96,9 +97,12 @@ public class ScheduledRecurrentPaymentBs {
             newEntity.setStartDate(request.getStartDate());
             newEntity.setEndDate(request.getEndDate());
             newEntity.setEndAfter(request.getEndAfter());
+            newEntity.setDayOfWeek(request.getDayOfWeek());
+            newEntity.setDayOfMonth(request.getDayOfMonth());
+            newEntity.setEndAfter(request.getEndAfter());
             newEntity.setType(request.getType());
             newEntity.setPaymentTransactionType(request.getPaymentTransactionType());
-            newEntity.setFrequency(request.getFrequency());
+            newEntity.setPaymentFrequency(request.getFrequency());
             newEntity.setStatus(request.getStatus());
             newEntity.setCancelUserId(request.getCancelUserId());
             newEntity.setCancelDateTime(request.getCancelDateTime());
@@ -120,11 +124,11 @@ public class ScheduledRecurrentPaymentBs {
         return response;
     }
 
-    public ScheduledRecurrentPaymentResponse update(MozidoTrxRequest mozidoTrxRequest, long id, ScheduledRecurrentPaymentRequest request) throws ControllerException, ParseException {
+    public ScheduledRecurrentPaymentResponse update(MozidoTrxRequest mozidoTrxRequest, long id, ScheduledRecurrentPaymentRequest request) throws ControllerException, ParseException, JsonProcessingException {
 
         ScheduledRecurrentPaymentResponse response = new ScheduledRecurrentPaymentResponse();
         GetMyUserResponse myUserResponse = commonBs.getMyUserInfo(mozidoTrxRequest, null);
-        if(myUserResponse.getUser() != null)
+        if(myUserResponse != null)
         {
             ScheduledRecurrentPayment updatedEntity = scheduledRecurrentPaymentJpaRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("ScheduledRecurrentPayment not found"));
@@ -138,9 +142,11 @@ public class ScheduledRecurrentPaymentBs {
 //        updatedEntity.setStartDate(request.getStartDate());
 //        updatedEntity.setEndDate(request.getEndDate());
 //        updatedEntity.setEndAfter(request.getEndAfter());
+//          updatedEntity.setDayOfWeek(request.getDayOfWeek());
+//          updatedEntity.setDayOfMonth(request.getDayOfMonth());
 //        updatedEntity.setType(request.getType());
 //        updatedEntity.setPaymentTransactionType(request.getPaymentTransactionType());
-//        updatedEntity.setFrequency(request.getFrequency());
+//        updatedEntity.setPaymentFrequency(request.getPaymentFrequency());
           updatedEntity.setStatus(request.getStatus());
 //        updatedEntity.setCancelUserId(request.getCancelUserId());
 //        updatedEntity.setCancelDateTime(request.getCancelDateTime());
@@ -177,9 +183,11 @@ public class ScheduledRecurrentPaymentBs {
         response.setStartDate(savedEntity.getStartDate());
         response.setEndDate(savedEntity.getEndDate());
         response.setEndAfter(savedEntity.getEndAfter());
+        response.setDayOfWeek(savedEntity.getDayOfWeek());
+        response.setDayOfMonth(savedEntity.getDayOfMonth());
         response.setType(savedEntity.getType());
         response.setPaymentTransactionType(savedEntity.getPaymentTransactionType());
-        response.setFrequency(savedEntity.getFrequency());
+        response.setPaymentFrequency(savedEntity.getPaymentFrequency());
         response.setStatus(savedEntity.getStatus());
         response.setCancelUserId(savedEntity.getCancelUserId());
         response.setCancelDateTime(savedEntity.getCancelDateTime());
@@ -200,33 +208,30 @@ public class ScheduledRecurrentPaymentBs {
 
 
     public void processDuePayments(LocalDate today) throws ControllerException {
-        List<ScheduledRecurrentPayment> payments = scheduledRecurrentPaymentJpaRepository.findByStatus(PaymentStatus.ACTIVE);
-        for (ScheduledRecurrentPayment p : payments)
+        List<ScheduledRecurrentPayment> activePayments = scheduledRecurrentPaymentJpaRepository.findAllActive();
+        for (ScheduledRecurrentPayment payment : activePayments)
         {
             ExecutedScheduledRecurrentPayment executedPayment = new ExecutedScheduledRecurrentPayment();
-            if (paymentToProcess(p, today))
+            if (shouldExecuteToday(payment))
             {
-                String token = commonBs.getToken(p.getTenantName(),p.getTenantName());
+                String token = commonBs.getToken(payment.getTenantName(),payment.getTenantName());
 
-                executedPayment.setScheduledRecurrentPayment(p);
+                executedPayment.setScheduledRecurrentPayment(payment);
                 executedPayment.setExecutionDate(LocalDate.now());
                 executedPayment.setRetries(1);
                 executedPayment.setSuccess(true);
                 executedPayment.setTransactionStatus(PaymentTransactionStatus.UP);
                 try
                 {
-                    p.setLastProcessedDate(today);
-                    switch(p.getPaymentTransactionType())
-                    {
-                        case P2P:
-                            sendP2P(p.getTenantName(), token, p);
-                            break;
-                        case P2M:
-                            sendP2M(p.getTenantName(), token, p);
-                            break;
-                    }
-                    simulatePayment(p);
-                    scheduledRecurrentPaymentJpaRepository.save(p);
+                    payment.setLastProcessedDate(today);
+                    ContributeToEventRequest contributeRequest = new ContributeToEventRequest();
+                    contributeRequest.setId(Long.valueOf(payment.getSvaId()));
+                    contributeRequest.setSvaId(payment.getSvaId());
+                    contributeRequest.setAmount(payment.getAmount());
+                    contributeRequest.setTenantName(payment.getTenantName());
+                    contributeRequest.setToken(token);
+                    contributeToEvent(contributeRequest, null, null, null, null);
+
                 }
                 catch (Exception e)
                 {
@@ -236,36 +241,44 @@ public class ScheduledRecurrentPaymentBs {
                 }
                 finally
                 {
+                    scheduledRecurrentPaymentJpaRepository.save(payment);
                     executedScheduledRecurrentPaymentJpaRepository.save(executedPayment);
                 }
             }
         }
     }
 
-    private boolean paymentToProcess(ScheduledRecurrentPayment p, LocalDate today) {
-        
-        LocalDate last = p.getLastProcessedDate() == null ? p.getStartDate().minusDays(1) : p.getLastProcessedDate();
+    private boolean shouldExecuteToday(ScheduledRecurrentPayment p) {
 
-        if (p.getType() == PaymentType.SCHEDULED) {
-            return today.equals(p.getStartDate());
+        LocalDate today = LocalDate.now();
+
+        if (p.getLastProcessedDate() != null && p.getLastProcessedDate().isEqual(today)) {
+            return false;
         }
 
-
-        long days = ChronoUnit.DAYS.between(last, today);
-        return switch (p.getFrequency()) {
-            case WEEKLY -> days >= 7;
-            case BIWEEKLY -> days >= 14;
-            case MONTHLY -> last.plusMonths(1).isBefore(today) || last.plusMonths(1).isEqual(today);
-            case YEARLY -> last.plusYears(1).isBefore(today) || last.plusYears(1).isEqual(today);
-        };
-
-    }
-
-    private void simulatePayment(ScheduledRecurrentPayment p) throws Exception {
-        if (Math.random() < 0.3) {
-            throw new Exception("Transacción rechazada por el banco.");
+        if (p.getStartDate().isAfter(today)) {
+            return false;
         }
-        System.out.printf("✅ Pago procesado: %s %.2f\n", p.getUserId(), p.getAmount());
+
+        switch (p.getPaymentFrequency()) {
+            case WEEKLY:
+                return today.getDayOfWeek() == p.getDayOfWeek();
+
+            case BIWEEKLY:
+                long weeksSinceStart = ChronoUnit.WEEKS.between(p.getStartDate(), today);
+                return weeksSinceStart % 2 == 0 && today.getDayOfWeek() == p.getDayOfWeek();
+
+            case MONTHLY:
+                return today.getDayOfMonth() == p.getDayOfMonth();
+
+            case YEARLY:
+                return today.getMonth() == p.getStartDate().getMonth()
+                        && today.getDayOfMonth() == p.getStartDate().getDayOfMonth();
+
+            default:
+                return false;
+        }
+
     }
 
     private BaseResponse sendP2P(String tenantName, String token, ScheduledRecurrentPayment payment) throws ControllerException {
