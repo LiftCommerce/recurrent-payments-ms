@@ -27,8 +27,10 @@ public class ScheduledRecurrentPayment {
     private String userId;
     private String svaId;
     private String basketId;
+    private String basketName;
     private String username;
     private String companyCode;
+    private String companyName;
 
     private Double amount;
     private LocalDate startDate;
@@ -61,6 +63,7 @@ public class ScheduledRecurrentPayment {
     private boolean pendingSenderApproval;
 
     private LocalDate lastProcessedDate;
+    private LocalDate nextOccurrenceDate;
     private String notes;
     private String currencyCode;
 
@@ -229,14 +232,6 @@ public class ScheduledRecurrentPayment {
         this.username = username;
     }
 
-    public String getCompanyCode() {
-        return companyCode;
-    }
-
-    public void setCompanyCode(String companyCode) {
-        this.companyCode = companyCode;
-    }
-
     public String getCurrencyCode() {
         return currencyCode;
     }
@@ -267,5 +262,37 @@ public class ScheduledRecurrentPayment {
 
     public void setDayOfMonth(Integer dayOfMonth) {
         this.dayOfMonth = dayOfMonth;
+    }
+
+    public String getBasketName() {
+        return basketName;
+    }
+
+    public void setBasketName(String basketName) {
+        this.basketName = basketName;
+    }
+
+    public String getCompanyName() {
+        return companyName;
+    }
+
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName;
+    }
+
+    public LocalDate getNextOccurrenceDate() {
+        return nextOccurrenceDate;
+    }
+
+    public void setNextOccurrenceDate(LocalDate nextOccurrenceDate) {
+        this.nextOccurrenceDate = nextOccurrenceDate;
+    }
+
+    public String getCompanyCode() {
+        return companyCode;
+    }
+
+    public void setCompanyCode(String companyCode) {
+        this.companyCode = companyCode;
     }
 }

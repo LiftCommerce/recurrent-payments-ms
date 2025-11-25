@@ -1,5 +1,7 @@
 package com.mozido.recurrentpayments.model.response;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.mozido.recurrentpayments.model.PaymentFrequency;
 import com.mozido.recurrentpayments.model.PaymentStatus;
 import com.mozido.recurrentpayments.model.PaymentTransactionType;
@@ -14,7 +16,8 @@ import java.time.LocalDate;
 /**
  * Created by Rafael Richards on 06/25.
  */
-
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ScheduledRecurrentPaymentResponse {
 
     private long id;
@@ -22,8 +25,10 @@ public class ScheduledRecurrentPaymentResponse {
     private String userId;
     private String svaId;
     private String basketId;
+    private String basketName;
     private String username;
     private String companyCode;
+    private String companyName;
     private Double amount;
     private LocalDate startDate;
     private LocalDate endDate;
@@ -41,6 +46,7 @@ public class ScheduledRecurrentPaymentResponse {
     private boolean userSuppressReminders;
     private boolean pendingSenderApproval;
     private LocalDate lastProcessedDate;
+    private LocalDate nextOccurrenceDate;
     private String notes;
     private String currencyCode;
 
@@ -212,14 +218,6 @@ public class ScheduledRecurrentPaymentResponse {
         this.username = username;
     }
 
-    public String getCompanyCode() {
-        return companyCode;
-    }
-
-    public void setCompanyCode(String companyCode) {
-        this.companyCode = companyCode;
-    }
-
     public String getCurrencyCode() {
         return currencyCode;
     }
@@ -250,5 +248,37 @@ public class ScheduledRecurrentPaymentResponse {
 
     public void setDayOfMonth(Integer dayOfMonth) {
         this.dayOfMonth = dayOfMonth;
+    }
+
+    public String getBasketName() {
+        return basketName;
+    }
+
+    public void setBasketName(String basketName) {
+        this.basketName = basketName;
+    }
+
+    public String getCompanyName() {
+        return companyName;
+    }
+
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName;
+    }
+
+    public LocalDate getNextOccurrenceDate() {
+        return nextOccurrenceDate;
+    }
+
+    public void setNextOccurrenceDate(LocalDate nextOccurrenceDate) {
+        this.nextOccurrenceDate = nextOccurrenceDate;
+    }
+
+    public String getCompanyCode() {
+        return companyCode;
+    }
+
+    public void setCompanyCode(String companyCode) {
+        this.companyCode = companyCode;
     }
 }

@@ -48,6 +48,9 @@ public class CommonBs
     @Value("${v1.tyk.api.key}")
     private String apiKey;
 
+    @Value("${environment}")
+    private String environment;
+
     private SettingJpaRepository settingJpaRepository;
 
     Logger logger = LoggerFactory.getLogger(CommonBs.class);
@@ -151,6 +154,7 @@ public class CommonBs
         headers.add("Authorization", request.getToken());
         headers.add("TenantName", request.getTenantName());
         headers.add("api-key", apiKey);
+        headers.add("environment", environment);
 
         HttpEntity requestEntity = new HttpEntity<>(request, headers);
 

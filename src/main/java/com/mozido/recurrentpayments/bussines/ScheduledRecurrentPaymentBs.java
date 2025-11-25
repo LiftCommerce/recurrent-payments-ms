@@ -5,10 +5,11 @@ import com.mozido.recurrentpayments.entity.ExecutedScheduledRecurrentPayment;
 import com.mozido.recurrentpayments.entity.ScheduledRecurrentPayment;
 import com.mozido.recurrentpayments.exception.ControllerException;
 import com.mozido.recurrentpayments.exception.ErrorResponses;
+import com.mozido.recurrentpayments.model.PaymentFrequency;
 import com.mozido.recurrentpayments.model.PaymentStatus;
 import com.mozido.recurrentpayments.model.PaymentTransactionStatus;
-import com.mozido.recurrentpayments.model.PaymentType;
 import com.mozido.recurrentpayments.model.request.*;
+import com.mozido.recurrentpayments.model.response.ApiResponse;
 import com.mozido.recurrentpayments.model.response.BaseResponse;
 import com.mozido.recurrentpayments.model.response.GetMyUserResponse;
 import com.mozido.recurrentpayments.model.response.ScheduledRecurrentPaymentResponse;
@@ -32,7 +33,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.text.ParseException;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 
 /**
@@ -60,6 +61,8 @@ public class ScheduledRecurrentPaymentBs {
     @Value("${fundz.event.contribute.url}")
     private String fundzEventContributeUrl;
 
+    private final String CATHOLIC_TENANT = "RCC";
+
     private ScheduledRecurrentPaymentFilterRepository scheduledRecurrentPaymentFilterRepository;
     private ScheduledRecurrentPaymentJpaRepository scheduledRecurrentPaymentJpaRepository;
     private ExecutedScheduledRecurrentPaymentJpaRepository executedScheduledRecurrentPaymentJpaRepository;
@@ -81,128 +84,210 @@ public class ScheduledRecurrentPaymentBs {
         this.commonBs = commonBs;
     }
 
-    public ScheduledRecurrentPaymentResponse create(MozidoTrxRequest mozidoTrxRequest, ScheduledRecurrentPaymentRequest request) throws Exception {
+    public ResponseEntity<ApiResponse<ScheduledRecurrentPaymentResponse>> create(MozidoTrxRequest mozidoTrxRequest, ScheduledRecurrentPaymentRequest request) throws Exception {
         ScheduledRecurrentPayment newEntity = new ScheduledRecurrentPayment();
         ScheduledRecurrentPaymentResponse response = new ScheduledRecurrentPaymentResponse();
-        GetMyUserResponse myUserResponse = commonBs.getMyUserInfo(mozidoTrxRequest, null);
-        if(myUserResponse != null)
+
+        if(mozidoTrxRequest.getTenantName().equals(CATHOLIC_TENANT))
         {
-            newEntity.setTenantName(mozidoTrxRequest.getTenantName());
-            newEntity.setUserId(myUserResponse.getUser().getUserUUID());
-            newEntity.setUsername(myUserResponse.getUser().getUsername());
-            newEntity.setSvaId(request.getSvaId());
-            newEntity.setBasketId(request.getBasketId());
-            newEntity.setCompanyCode(request.getCompanyCode());
-            newEntity.setAmount(request.getAmount());
-            newEntity.setStartDate(request.getStartDate());
-            newEntity.setEndDate(request.getEndDate());
-            newEntity.setEndAfter(request.getEndAfter());
-            newEntity.setDayOfWeek(request.getDayOfWeek());
-            newEntity.setDayOfMonth(request.getDayOfMonth());
-            newEntity.setEndAfter(request.getEndAfter());
-            newEntity.setType(request.getType());
-            newEntity.setPaymentTransactionType(request.getPaymentTransactionType());
-            newEntity.setPaymentFrequency(request.getFrequency());
-            newEntity.setStatus(request.getStatus());
-            newEntity.setCancelUserId(request.getCancelUserId());
-            newEntity.setCancelDateTime(request.getCancelDateTime());
-            newEntity.setUserAccepted(request.isUserAccepted());
-            newEntity.setUserDecline(request.isUserDecline());
-            newEntity.setUserSuppressReminders(request.isUserSuppressReminders());
-            newEntity.setPendingSenderApproval(request.isPendingSenderApproval());
-            newEntity.setLastProcessedDate(request.getLastProcessedDate());
-            newEntity.setNotes(request.getNotes());
-            newEntity.setCurrencyCode(request.getCurrencyCode());
-            ScheduledRecurrentPayment saved = scheduledRecurrentPaymentJpaRepository.save(newEntity);
-            BeanUtils.copyProperties(saved, response);
+            GetMyUserResponse myUserResponse = commonBs.getMyUserInfo(mozidoTrxRequest, null);
+            if(myUserResponse != null)
+            {
+                if (request.getStartDate().isBefore(LocalDate.now()))
+                {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body(ApiResponse.error(400, "Start date cannot be before today"));
+                }
+                else
+                {
+                    newEntity.setTenantName(mozidoTrxRequest.getTenantName());
+                    newEntity.setUserId(myUserResponse.getUser().getUserUUID());
+                    newEntity.setUsername(myUserResponse.getUser().getUsername());
+                    newEntity.setSvaId(request.getSvaId());
+                    newEntity.setBasketId(request.getBasketId());
+                    newEntity.setBasketName(request.getBasketName());
+                    newEntity.setCompanyCode(request.getCompanyCode());
+                    newEntity.setCompanyName(request.getCompanyName());
+                    newEntity.setAmount(request.getAmount());
+                    newEntity.setStartDate(request.getStartDate());
+                    newEntity.setEndDate(request.getEndDate());
+                    newEntity.setEndAfter(request.getEndAfter());
+                    newEntity.setDayOfWeek(request.getDayOfWeek());
+                    newEntity.setDayOfMonth(request.getDayOfMonth());
+                    newEntity.setEndAfter(request.getEndAfter());
+                    newEntity.setType(request.getType());
+                    newEntity.setPaymentTransactionType(request.getPaymentTransactionType());
+                    newEntity.setPaymentFrequency(request.getFrequency());
+                    newEntity.setStatus(request.getStatus());
+                    newEntity.setCancelUserId(request.getCancelUserId());
+                    newEntity.setCancelDateTime(request.getCancelDateTime());
+                    newEntity.setUserAccepted(request.isUserAccepted());
+                    newEntity.setUserDecline(request.isUserDecline());
+                    newEntity.setUserSuppressReminders(request.isUserSuppressReminders());
+                    newEntity.setPendingSenderApproval(request.isPendingSenderApproval());
+                    newEntity.setLastProcessedDate(request.getLastProcessedDate());
+                    newEntity.setNotes(request.getNotes());
+                    newEntity.setCurrencyCode(request.getCurrencyCode());
+                    newEntity.setNextOccurrenceDate(calculateNextOccurrenceDate(newEntity));
+                    ScheduledRecurrentPayment saved = scheduledRecurrentPaymentJpaRepository.save(newEntity);
+                    BeanUtils.copyProperties(saved, response);
+
+                    if(request.getFrequency().equals(PaymentFrequency.DAILY) && !request.isDeferToNextOccurrence())
+                    {
+                        ExecutedScheduledRecurrentPayment executedPayment = new ExecutedScheduledRecurrentPayment();
+                        {
+                            LocalDate today = LocalDate.now();
+                            executedPayment.setScheduledRecurrentPayment(saved);
+                            executedPayment.setExecutionDate(LocalDate.now());
+                            executedPayment.setRetries(1);
+                            executedPayment.setSuccess(true);
+                            executedPayment.setTransactionStatus(PaymentTransactionStatus.UP);
+                            try
+                            {
+                                saved.setLastProcessedDate(today);
+                                ContributeToEventRequest contributeRequest = new ContributeToEventRequest();
+                                contributeRequest.setId(Long.valueOf(saved.getSvaId()));
+                                contributeRequest.setSvaId(saved.getSvaId());
+                                contributeRequest.setAmount(saved.getAmount());
+                                contributeRequest.setTenantName(saved.getTenantName());
+                                contributeRequest.setToken(mozidoTrxRequest.getToken());
+                                contributeToEvent(contributeRequest, null, null, null, null);
+
+                            }
+                            catch (Exception e)
+                            {
+                                executedPayment.setSuccess(false);
+                                executedPayment.setErrorMessage(e.getMessage());
+                                executedPayment.setTransactionStatus(PaymentTransactionStatus.DOWN);
+                            }
+                            finally
+                            {
+                                scheduledRecurrentPaymentJpaRepository.save(saved);
+                                executedScheduledRecurrentPaymentJpaRepository.save(executedPayment);
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(ApiResponse.error(404, "User not Found"));
+            }
         }
         else
         {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not Found");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.error(400, "Tenant "+mozidoTrxRequest.getTenantName()+" NOT ALLOWED"));
         }
 
-        return response;
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    public ScheduledRecurrentPaymentResponse update(MozidoTrxRequest mozidoTrxRequest, long id, ScheduledRecurrentPaymentRequest request) throws ControllerException, ParseException, JsonProcessingException {
+    public ResponseEntity<ApiResponse<ScheduledRecurrentPaymentResponse>> update(MozidoTrxRequest mozidoTrxRequest, long id, ScheduledRecurrentPaymentRequest request) throws ControllerException, ParseException, JsonProcessingException {
 
         ScheduledRecurrentPaymentResponse response = new ScheduledRecurrentPaymentResponse();
-        GetMyUserResponse myUserResponse = commonBs.getMyUserInfo(mozidoTrxRequest, null);
-        if(myUserResponse != null)
+        if(mozidoTrxRequest.getTenantName().equals(CATHOLIC_TENANT))
         {
-            ScheduledRecurrentPayment updatedEntity = scheduledRecurrentPaymentJpaRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("ScheduledRecurrentPayment not found"));
-//        updatedEntity.setTenantName(request.getTenantName());
-//        updatedEntity.setUserId(request.getUserId());
-//        updatedEntity.setUsername(request.getUsername());
-//        updatedEntity.setSvaId(request.getSvaId());
-//        updatedEntity.setBasketId(request.getBasketId());
-//        updatedEntity.setCompanyCode(request.getCompanyCode());
-//        updatedEntity.setAmount(request.getAmount());
-//        updatedEntity.setStartDate(request.getStartDate());
-//        updatedEntity.setEndDate(request.getEndDate());
-//        updatedEntity.setEndAfter(request.getEndAfter());
-//          updatedEntity.setDayOfWeek(request.getDayOfWeek());
-//          updatedEntity.setDayOfMonth(request.getDayOfMonth());
-//        updatedEntity.setType(request.getType());
-//        updatedEntity.setPaymentTransactionType(request.getPaymentTransactionType());
-//        updatedEntity.setPaymentFrequency(request.getPaymentFrequency());
-          updatedEntity.setStatus(request.getStatus());
-//        updatedEntity.setCancelUserId(request.getCancelUserId());
-//        updatedEntity.setCancelDateTime(request.getCancelDateTime());
-//        updatedEntity.setUserAccepted(request.isUserAccepted());
-//        updatedEntity.setUserDecline(request.isUserDecline());
-//        updatedEntity.setUserSuppressReminders(request.isUserSuppressReminders());
-//        updatedEntity.setPendingSenderApproval(request.isPendingSenderApproval());
-//        updatedEntity.setLastProcessedDate(request.getLastProcessedDate());
-//        updatedEntity.setNotes(request.getNotes());
-//        updatedEntity.setCurrencyCode(request.getCurrencyCode());
-          ScheduledRecurrentPayment saved = scheduledRecurrentPaymentJpaRepository.save(updatedEntity);
-          BeanUtils.copyProperties(saved, response);
+            GetMyUserResponse myUserResponse = commonBs.getMyUserInfo(mozidoTrxRequest, null);
+            if(myUserResponse != null)
+            {
+                ScheduledRecurrentPayment updatedEntity = scheduledRecurrentPaymentJpaRepository.findById(id)
+                        .orElseThrow(() -> new RuntimeException("ScheduledRecurrentPayment not found"));
+
+                if(! updatedEntity.getStatus().equals(PaymentStatus.CANCELED))
+                {
+                    updatedEntity.setStatus(request.getStatus());
+                    ScheduledRecurrentPayment saved = scheduledRecurrentPaymentJpaRepository.save(updatedEntity);
+                    BeanUtils.copyProperties(saved, response);
+                }
+                else
+                {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body(ApiResponse.error(400, "Recurrent Payment is in CANCELED status"));
+                }
+            }
+            else
+            {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(ApiResponse.error(404, "User not Found"));
+            }
         }
         else
         {
-             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not Found");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.error(400, "Tenant "+mozidoTrxRequest.getTenantName()+" NOT ALLOWED"));
         }
-        return response;
+
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    public ScheduledRecurrentPaymentResponse get(MozidoTrxRequest mozidoTrxRequest, long id) {
-        ScheduledRecurrentPayment savedEntity = scheduledRecurrentPaymentJpaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("ScheduledRecurrentPayment not found"));
+    public ResponseEntity<ApiResponse<ScheduledRecurrentPaymentResponse>> get(MozidoTrxRequest mozidoTrxRequest, long id) throws ControllerException, ParseException, JsonProcessingException {
 
-        ScheduledRecurrentPaymentResponse response = new ScheduledRecurrentPaymentResponse();
-        response.setId(savedEntity.getId());
-        response.setTenantName(savedEntity.getTenantName());
-        response.setUserId(savedEntity.getUserId());
-        response.setUsername(savedEntity.getUsername());
-        response.setSvaId(savedEntity.getSvaId());
-        response.setBasketId(savedEntity.getBasketId());
-        response.setCompanyCode(savedEntity.getCompanyCode());
-        response.setAmount(savedEntity.getAmount());
-        response.setStartDate(savedEntity.getStartDate());
-        response.setEndDate(savedEntity.getEndDate());
-        response.setEndAfter(savedEntity.getEndAfter());
-        response.setDayOfWeek(savedEntity.getDayOfWeek());
-        response.setDayOfMonth(savedEntity.getDayOfMonth());
-        response.setType(savedEntity.getType());
-        response.setPaymentTransactionType(savedEntity.getPaymentTransactionType());
-        response.setPaymentFrequency(savedEntity.getPaymentFrequency());
-        response.setStatus(savedEntity.getStatus());
-        response.setCancelUserId(savedEntity.getCancelUserId());
-        response.setCancelDateTime(savedEntity.getCancelDateTime());
-        response.setUserAccepted(savedEntity.isUserAccepted());
-        response.setUserDecline(savedEntity.isUserDecline());
-        response.setUserSuppressReminders(savedEntity.isUserSuppressReminders());
-        response.setPendingSenderApproval(savedEntity.isPendingSenderApproval());
-        response.setLastProcessedDate(savedEntity.getLastProcessedDate());
-        response.setNotes(savedEntity.getNotes());
-        response.setCurrencyCode(savedEntity.getCurrencyCode());
-        return response;
+        if(mozidoTrxRequest.getTenantName().equals(CATHOLIC_TENANT))
+        {
+            GetMyUserResponse myUserResponse = commonBs.getMyUserInfo(mozidoTrxRequest, null);
+            if(myUserResponse != null)
+            {
+
+                ScheduledRecurrentPayment savedEntity = scheduledRecurrentPaymentJpaRepository.findById(id)
+                        .orElseThrow(() -> new RuntimeException("ScheduledRecurrentPayment not found"));
+
+                ScheduledRecurrentPaymentResponse response = new ScheduledRecurrentPaymentResponse();
+                response.setId(savedEntity.getId());
+                response.setTenantName(savedEntity.getTenantName());
+                response.setUserId(savedEntity.getUserId());
+                response.setUsername(savedEntity.getUsername());
+                response.setSvaId(savedEntity.getSvaId());
+                response.setBasketId(savedEntity.getBasketId());
+                response.setBasketName(savedEntity.getBasketName());
+                response.setCompanyCode(savedEntity.getCompanyCode());
+                response.setCompanyName(savedEntity.getCompanyName());
+                response.setAmount(savedEntity.getAmount());
+                response.setStartDate(savedEntity.getStartDate());
+                response.setEndDate(savedEntity.getEndDate());
+                response.setEndAfter(savedEntity.getEndAfter());
+                response.setDayOfWeek(savedEntity.getDayOfWeek());
+                response.setDayOfMonth(savedEntity.getDayOfMonth());
+                response.setType(savedEntity.getType());
+                response.setPaymentTransactionType(savedEntity.getPaymentTransactionType());
+                response.setPaymentFrequency(savedEntity.getPaymentFrequency());
+                response.setStatus(savedEntity.getStatus());
+                response.setCancelUserId(savedEntity.getCancelUserId());
+                response.setCancelDateTime(savedEntity.getCancelDateTime());
+                response.setUserAccepted(savedEntity.isUserAccepted());
+                response.setUserDecline(savedEntity.isUserDecline());
+                response.setUserSuppressReminders(savedEntity.isUserSuppressReminders());
+                response.setPendingSenderApproval(savedEntity.isPendingSenderApproval());
+                response.setLastProcessedDate(savedEntity.getLastProcessedDate());
+                response.setNextOccurrenceDate(savedEntity.getNextOccurrenceDate());
+                response.setNotes(savedEntity.getNotes());
+                response.setCurrencyCode(savedEntity.getCurrencyCode());
+                return ResponseEntity.ok(ApiResponse.success(response));
+            }
+            else
+            {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(ApiResponse.error(404, "User not Found"));
+            }
+        }
+        else
+        {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.error(400, "Tenant "+mozidoTrxRequest.getTenantName()+" NOT ALLOWED"));
+        }
+
     }
 
-    public Page<ScheduledRecurrentPayment> findByFilters(ScheduledRecurrentPaymentFilter filter, Pageable pageable) {
-        return scheduledRecurrentPaymentFilterRepository.findByFilters(filter, pageable);
+    public Page<ScheduledRecurrentPayment> findByFilters(MozidoTrxRequest mozidoTrxRequest, ScheduledRecurrentPaymentFilter filter, Pageable pageable) {
+        if(mozidoTrxRequest.getTenantName().equals(CATHOLIC_TENANT))
+        {
+            return scheduledRecurrentPaymentFilterRepository.findByFilters(filter, pageable);
+        }
+        else
+        {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tenant "+mozidoTrxRequest.getTenantName()+" NOT ALLOWED");
+        }
     }
 
 
@@ -224,6 +309,9 @@ public class ScheduledRecurrentPaymentBs {
                 try
                 {
                     payment.setLastProcessedDate(today);
+                    LocalDate next = calculateNextOccurrenceDate(payment);
+                    payment.setNextOccurrenceDate(next);
+
                     ContributeToEventRequest contributeRequest = new ContributeToEventRequest();
                     contributeRequest.setId(Long.valueOf(payment.getSvaId()));
                     contributeRequest.setSvaId(payment.getSvaId());
@@ -249,36 +337,68 @@ public class ScheduledRecurrentPaymentBs {
     }
 
     private boolean shouldExecuteToday(ScheduledRecurrentPayment p) {
+        return LocalDate.now().isEqual(p.getNextOccurrenceDate());
+    }
+
+    public LocalDate calculateNextOccurrenceDate(ScheduledRecurrentPayment p) {
 
         LocalDate today = LocalDate.now();
+        LocalDate start = p.getStartDate();
+        LocalDate lastProcessed = p.getLastProcessedDate();
 
-        if (p.getLastProcessedDate() != null && p.getLastProcessedDate().isEqual(today)) {
-            return false;
+        LocalDate baseDate;
+        if (lastProcessed == null)
+        {
+            if (today.isBefore(start))
+            {
+                return start;
+            }
+
+            baseDate = start;
+        }
+        else
+        {
+            baseDate = lastProcessed;
         }
 
-        if (p.getStartDate().isAfter(today)) {
-            return false;
-        }
+        switch (p.getPaymentFrequency())
+        {
+            case DAILY:
+                return baseDate.plusDays(1);
 
-        switch (p.getPaymentFrequency()) {
             case WEEKLY:
-                return today.getDayOfWeek() == p.getDayOfWeek();
+                return baseDate.with(TemporalAdjusters.next(p.getDayOfWeek()));
 
             case BIWEEKLY:
-                long weeksSinceStart = ChronoUnit.WEEKS.between(p.getStartDate(), today);
-                return weeksSinceStart % 2 == 0 && today.getDayOfWeek() == p.getDayOfWeek();
+                LocalDate nextWeekly = baseDate.with(TemporalAdjusters.next(p.getDayOfWeek()));
+                return nextWeekly.plusWeeks(1);
 
             case MONTHLY:
-                return today.getDayOfMonth() == p.getDayOfMonth();
+                Integer dom = p.getDayOfMonth();
+                if (dom == null) {
+                    throw new IllegalStateException("dayOfMonth can't be null for MONTHLY Frequency");
+                }
+
+                LocalDate nextMonth = baseDate.plusMonths(1);
+
+                int lastDay = nextMonth.lengthOfMonth();
+                int day = Math.min(dom, lastDay);
+
+                return nextMonth.withDayOfMonth(day);
 
             case YEARLY:
-                return today.getMonth() == p.getStartDate().getMonth()
-                        && today.getDayOfMonth() == p.getStartDate().getDayOfMonth();
+                LocalDate sd = p.getStartDate();
+                if (sd == null) {
+                    throw new IllegalStateException("startDate can't be null for YEARLY");
+                }
+
+                return baseDate.plusYears(1)
+                        .withMonth(sd.getMonthValue())
+                        .withDayOfMonth(sd.getDayOfMonth());
 
             default:
-                return false;
+                throw new IllegalArgumentException("Frequency not supported: " + p.getPaymentFrequency());
         }
-
     }
 
     private BaseResponse sendP2P(String tenantName, String token, ScheduledRecurrentPayment payment) throws ControllerException {

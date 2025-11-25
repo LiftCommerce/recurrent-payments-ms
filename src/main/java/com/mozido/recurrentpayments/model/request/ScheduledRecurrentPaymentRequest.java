@@ -4,7 +4,7 @@ import com.mozido.recurrentpayments.model.PaymentFrequency;
 import com.mozido.recurrentpayments.model.PaymentStatus;
 import com.mozido.recurrentpayments.model.PaymentTransactionType;
 import com.mozido.recurrentpayments.model.PaymentType;
-import java.math.BigDecimal;
+
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 
@@ -17,8 +17,10 @@ public class ScheduledRecurrentPaymentRequest {
     private String userId;
     private String svaId;
     private String basketId;
+    private String basketName;
     private String username;
     private String companyCode;
+    private String companyName;
     private Double amount;
     private LocalDate startDate;
     private DayOfWeek dayOfWeek;
@@ -36,8 +38,10 @@ public class ScheduledRecurrentPaymentRequest {
     private boolean userSuppressReminders;
     private boolean pendingSenderApproval;
     private LocalDate lastProcessedDate;
+    private LocalDate nextOccurrenceDate;
     private String notes;
     private String currencyCode;
+    private boolean deferToNextOccurrence;
 
     public String getTenantName() {
         return tenantName;
@@ -199,14 +203,6 @@ public class ScheduledRecurrentPaymentRequest {
         this.username = username;
     }
 
-    public String getCompanyCode() {
-        return companyCode;
-    }
-
-    public void setCompanyCode(String companyCode) {
-        this.companyCode = companyCode;
-    }
-
     public String getCurrencyCode() {
         return currencyCode;
     }
@@ -237,5 +233,45 @@ public class ScheduledRecurrentPaymentRequest {
 
     public void setDayOfMonth(Integer dayOfMonth) {
         this.dayOfMonth = dayOfMonth;
+    }
+
+    public boolean isDeferToNextOccurrence() {
+        return deferToNextOccurrence;
+    }
+
+    public void setDeferToNextOccurrence(boolean deferToNextOccurrence) {
+        this.deferToNextOccurrence = deferToNextOccurrence;
+    }
+
+    public String getBasketName() {
+        return basketName;
+    }
+
+    public void setBasketName(String basketName) {
+        this.basketName = basketName;
+    }
+
+    public String getCompanyName() {
+        return companyName;
+    }
+
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName;
+    }
+
+    public LocalDate getNextOccurrenceDate() {
+        return nextOccurrenceDate;
+    }
+
+    public void setNextOccurrenceDate(LocalDate nextOccurrenceDate) {
+        this.nextOccurrenceDate = nextOccurrenceDate;
+    }
+
+    public String getCompanyCode() {
+        return companyCode;
+    }
+
+    public void setCompanyCode(String companyCode) {
+        this.companyCode = companyCode;
     }
 }

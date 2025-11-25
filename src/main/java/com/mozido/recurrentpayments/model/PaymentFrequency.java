@@ -5,5 +5,5 @@ package com.mozido.recurrentpayments.model;
  */
 
 public enum PaymentFrequency {
-    WEEKLY, BIWEEKLY, MONTHLY, YEARLY;
+    DAILY, WEEKLY, BIWEEKLY, MONTHLY, YEARLY;
 }

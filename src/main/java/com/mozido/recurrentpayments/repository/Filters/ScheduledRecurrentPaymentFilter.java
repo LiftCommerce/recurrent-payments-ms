@@ -14,8 +14,10 @@ public class ScheduledRecurrentPaymentFilter {
     private String userId;
     private String svaId;
     private String basketId;
+    private String basketName;
     private String username;
     private String companyCode;
+    private String companyName;
     private BigDecimal amount;
     private LocalDate startDate;
     private LocalDate endDate;
@@ -31,6 +33,7 @@ public class ScheduledRecurrentPaymentFilter {
     private boolean userSuppressReminders;
     private boolean pendingSenderApproval;
     private LocalDate lastProcessedDate;
+    private LocalDate nextOccurrenceDate;
     private String notes;
     private String currencyCode;
 
@@ -252,5 +255,29 @@ public class ScheduledRecurrentPaymentFilter {
 
     public void setBasketId(String basketId) {
         this.basketId = basketId;
+    }
+
+    public String getBasketName() {
+        return basketName;
+    }
+
+    public void setBasketName(String basketName) {
+        this.basketName = basketName;
+    }
+
+    public String getCompanyName() {
+        return companyName;
+    }
+
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName;
+    }
+
+    public LocalDate getNextOccurrenceDate() {
+        return nextOccurrenceDate;
+    }
+
+    public void setNextOccurrenceDate(LocalDate nextOccurrenceDate) {
+        this.nextOccurrenceDate = nextOccurrenceDate;
     }
 }

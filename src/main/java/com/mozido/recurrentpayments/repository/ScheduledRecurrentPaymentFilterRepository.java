@@ -5,13 +5,11 @@ import com.mozido.recurrentpayments.repository.Filters.ScheduledRecurrentPayment
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +31,11 @@ public class ScheduledRecurrentPaymentFilterRepository {
 
         List<Predicate> predicates = buildPredicates(cb, root, filter);
         cq.where(predicates.toArray(new Predicate[0]));
-        cq.orderBy(cb.desc(root.get("startDate")));
+        List<Order> orders = buildOrders(cb, root, pageable.getSort());
+        if (!orders.isEmpty())
+        {
+            cq.orderBy(orders);
+        }
 
         TypedQuery<ScheduledRecurrentPayment> query = entityManager.createQuery(cq);
         query.setFirstResult((int) pageable.getOffset());
@@ -68,11 +70,17 @@ public class ScheduledRecurrentPaymentFilterRepository {
         if (filter.getBasketId() != null)
             predicates.add(cb.equal(root.get("basketId"), filter.getBasketId()));
 
+        if (filter.getBasketName() != null)
+            predicates.add(cb.equal(root.get("basketName"), filter.getBasketName()));
+
         if (filter.getUsername() != null)
             predicates.add(cb.equal(root.get("username"), filter.getUsername()));
 
         if (filter.getCompanyCode() != null)
             predicates.add(cb.equal(root.get("companyCode"), filter.getCompanyCode()));
+
+        if (filter.getCompanyName() != null)
+            predicates.add(cb.equal(root.get("companyName"), filter.getCompanyName()));
 
         if (filter.getAmount() != null)
             predicates.add(cb.equal(root.get("amount"), filter.getAmount()));
@@ -119,6 +127,9 @@ public class ScheduledRecurrentPaymentFilterRepository {
         if (filter.getLastProcessedDate() != null)
             predicates.add(cb.equal(root.get("lastProcessedDate"), filter.getLastProcessedDate()));
 
+        if (filter.getNextOccurrenceDate() != null)
+            predicates.add(cb.equal(root.get("nextOccurrenceDate"), filter.getNextOccurrenceDate()));
+
         if (filter.getNotes() != null)
             predicates.add(cb.like(root.get("notes"), "%" + filter.getNotes() + "%"));
 
@@ -126,5 +137,20 @@ public class ScheduledRecurrentPaymentFilterRepository {
             predicates.add(cb.equal(root.get("currencyCode"), filter.getCurrencyCode()));
 
         return predicates;
+    }
+
+    private List<Order> buildOrders(CriteriaBuilder cb, Root<?> root, Sort sort) {
+        List<Order> orders = new ArrayList<>();
+
+        if (sort == null || sort.isUnsorted()) {
+            return orders;
+        }
+
+        sort.forEach(order -> {
+            Path<?> path = root.get(order.getProperty());
+            orders.add(order.isAscending() ? cb.asc(path) : cb.desc(path));
+        });
+
+        return orders;
     }
 }

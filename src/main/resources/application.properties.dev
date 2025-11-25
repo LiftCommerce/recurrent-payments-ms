@@ -1,5 +1,5 @@
 server.port=8086
-
+environment=dev
 spring.datasource.maxActive=2
 spring.datasource.hikari.maximum-pool-size=2
 spring.datasource.max-idle=2
@@ -28,15 +28,15 @@ spring.jpa.properties.hibernate.format_sql=true
 spring.jpa.properties.hibernate.use_sql=true
 spring.mvc.pathmatch.matching-strategy=ant_path_matcher
 
-v1.mozido.switch.oauth.internal.url=http://api-dev.liftcommerce.com/auth/oauth/token
+v1.mozido.switch.oauth.internal.url=https://api.cloudpayments-staging.com/auth/oauth/token
 v1.mozido.switch.createSVA.url=payment/api/v1/services/createAccount
 
-v1.tyk.api.key=5dbb36169aa4ad00019f74972a304fa29e124044b9702478b24cd3d1
+v1.tyk.api.key=613a606b20808900019edcd6e0d540ed0f9243e89a7393fd0b46ae92
 v1.tyk.public.key=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAnZP01KrZd2fNjBT4yeXSjdbDs2+wxEEUXqbYTcAbZ8SqU5GEumGPXPpWxv3oVdW8ycvY6EcqE2IUWGXcDw3FsLIEquwhFfiwNtGAoLq2HffTngf0b21cB7uWtjxQYnuHYyyJb19PaUhGCrxveWPTT79IxoUjBIDmNKmyxKs0LLKNHIl8Q4zqRDFe7pdvNQv52dJgoGBBHBk+7W1/MBUJXoVGqVEI8KC+ibpK4LEcjj3nZ1oFYsKBz60s1clzo9VDJFm78MK2Q7AtdlDlqQEiKQp07M6DJXMaWSADgclbx0fTuMztQe4IrpMAwRpoMg+wd1w+tjL1M/uAe4oaax1BiwIDAQAB
 v1.tyk.api.key.name=api-key
-v1.tyk.api.key.value=5dbb36169aa4ad00019f74972a304fa29e124044b9702478b24cd3d1
+v1.tyk.api.key.value=613a606b20808900019edcd6e0d540ed0f9243e89a7393fd0b46ae92
 
-fundz.base.url=https://api-dev.liftcommerce.com/fundz-ms/
+fundz.base.url=https://api.cloudpayments-staging.com/fundz-ms/
 fundz.event.url=event
 fundz.create.event.url=event
 fundz.get.event.url=event
@@ -140,7 +140,7 @@ fundz.search.customer.url=/loyalty/searchCustomer
 fundz.email.send.email.url=/email/sendEmail
 fundz.email.send.custom.email.url=/email/sendCustomEmail
 
-auth.base.url=http://api-dev.liftcommerce.com/auth/
+auth.base.url=https://api.cloudpayments-staging.com/auth/
 auth.change.password.url=api/myinfo/changePassword
 auth.reset.password.url=api/reset/password
 
