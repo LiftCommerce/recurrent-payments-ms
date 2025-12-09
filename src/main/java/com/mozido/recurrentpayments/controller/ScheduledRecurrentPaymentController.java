@@ -1,6 +1,7 @@
 package com.mozido.recurrentpayments.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.mozido.recurrentpayments.bussines.CommonBs;
 import com.mozido.recurrentpayments.bussines.ScheduledRecurrentPaymentBs;
 import com.mozido.recurrentpayments.entity.ScheduledRecurrentPayment;
 import com.mozido.recurrentpayments.exception.ControllerException;
@@ -13,6 +14,8 @@ import com.mozido.recurrentpayments.repository.Filters.ScheduledRecurrentPayment
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -37,6 +40,8 @@ import java.util.Map;
 public class ScheduledRecurrentPaymentController {
 
     private ScheduledRecurrentPaymentBs scheduledRecurrentPaymentBs;
+
+    Logger logger = LoggerFactory.getLogger(ScheduledRecurrentPaymentController.class);
 
     @Autowired
     public ScheduledRecurrentPaymentController(ScheduledRecurrentPaymentBs service) {
@@ -70,7 +75,12 @@ public class ScheduledRecurrentPaymentController {
     public ResponseEntity<ApiResponse<ScheduledRecurrentPaymentResponse>> get(
             @Parameter(description = "Tenant name, If you have your tenant use it, if not we provide one.") @RequestHeader(value = "tenantName") String tenantName,
             @Parameter(description = "Authorization token") @RequestHeader(value = "Authorization") String token,
+            @Parameter(description = "Authorization token 2 ") @RequestHeader(value = "token") String token2,
             @Parameter(description = "Id") @PathVariable long id) throws ControllerException, ParseException, JsonProcessingException {
+        logger.info("Authorization: " + token);
+
+        logger.info("token: " + token2);
+
         MozidoTrxRequest mozidoTrxRequest = new MozidoTrxRequest(tenantName, token, null);
         return scheduledRecurrentPaymentBs.get(mozidoTrxRequest, id);
     }

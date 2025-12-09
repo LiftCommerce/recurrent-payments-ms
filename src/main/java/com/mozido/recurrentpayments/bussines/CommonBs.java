@@ -152,9 +152,9 @@ public class CommonBs
         headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
         GetMyUserResponse getMyUserResponse = new GetMyUserResponse();
         headers.add("Authorization", request.getToken());
-        headers.add("TenantName", request.getTenantName());
-        headers.add("api-key", apiKey);
-        headers.add("environment", environment);
+        headers.add("tenantName", request.getTenantName());
+        //headers.add("api-key", apiKey);
+        //headers.add("environment", environment);
 
         HttpEntity requestEntity = new HttpEntity<>(request, headers);
 
