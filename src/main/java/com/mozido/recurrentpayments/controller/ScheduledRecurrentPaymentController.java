@@ -75,7 +75,7 @@ public class ScheduledRecurrentPaymentController {
     public ResponseEntity<ApiResponse<ScheduledRecurrentPaymentResponse>> get(
             @Parameter(description = "Tenant name, If you have your tenant use it, if not we provide one.") @RequestHeader(value = "tenantName") String tenantName,
             @Parameter(description = "Authorization token") @RequestHeader(value = "Authorization") String token,
-            @Parameter(description = "Authorization token 2 ") @RequestHeader(value = "token") String token2,
+            @Parameter(description = "Authorization token 2 ") @RequestHeader(value = "token" , required = false) String token2,
             @Parameter(description = "Id") @PathVariable long id) throws ControllerException, ParseException, JsonProcessingException {
         logger.info("Authorization: " + token);
 
