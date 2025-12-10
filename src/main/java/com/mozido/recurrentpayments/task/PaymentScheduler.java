@@ -17,7 +17,6 @@ public class PaymentScheduler {
     @Autowired
     private ScheduledRecurrentPaymentBs scheduledRecurrentPaymentBs;
 
-//    @Scheduled(cron = "0 0 9 * * *") // 9:00 AM todos los días
     public void runPaymentJob() throws ControllerException {
         scheduledRecurrentPaymentBs.processDuePayments(LocalDate.now());
     }
