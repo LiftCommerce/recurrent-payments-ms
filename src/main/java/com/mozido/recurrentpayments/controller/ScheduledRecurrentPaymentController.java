@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -90,7 +91,7 @@ public class ScheduledRecurrentPaymentController {
     public ResponseEntity<ApiPaginatedResponse<ScheduledRecurrentPayment>> findByFilters(
             @Parameter(description = "Tenant name, If you have your tenant use it, if not we provide one.") @RequestHeader(value = "tenantName") String tenantName,
             @Parameter(description = "Authorization token") @RequestHeader(value = "Authorization") String token,
-            Pageable pageable,
+            @ParameterObject Pageable pageable,
             @RequestBody ScheduledRecurrentPaymentFilter filterRequest)
     {
         MozidoTrxRequest mozidoTrxRequest = new MozidoTrxRequest(tenantName, token, null);
