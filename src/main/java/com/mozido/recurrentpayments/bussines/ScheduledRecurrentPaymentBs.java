@@ -88,9 +88,7 @@ public class ScheduledRecurrentPaymentBs {
         ScheduledRecurrentPayment newEntity = new ScheduledRecurrentPayment();
         ScheduledRecurrentPaymentResponse response = new ScheduledRecurrentPaymentResponse();
 
-        if(mozidoTrxRequest.getTenantName().equals(CATHOLIC_TENANT))
-        {
-            GetMyUserResponse myUserResponse = commonBs.getMyUserInfo(mozidoTrxRequest, null);
+          GetMyUserResponse myUserResponse = commonBs.getMyUserInfo(mozidoTrxRequest, null);
             if(myUserResponse != null)
             {
                 if (request.getStartDate().isBefore(LocalDate.now()))
@@ -174,12 +172,6 @@ public class ScheduledRecurrentPaymentBs {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(ApiResponse.error(404, "User not Found"));
             }
-        }
-        else
-        {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.error(400, "Tenant "+mozidoTrxRequest.getTenantName()+" NOT ALLOWED"));
-        }
 
         return ResponseEntity.ok(ApiResponse.success(response));
     }
@@ -187,8 +179,7 @@ public class ScheduledRecurrentPaymentBs {
     public ResponseEntity<ApiResponse<ScheduledRecurrentPaymentResponse>> update(MozidoTrxRequest mozidoTrxRequest, long id, ScheduledRecurrentPaymentRequest request) throws ControllerException, ParseException, JsonProcessingException {
 
         ScheduledRecurrentPaymentResponse response = new ScheduledRecurrentPaymentResponse();
-        if(mozidoTrxRequest.getTenantName().equals(CATHOLIC_TENANT))
-        {
+
             GetMyUserResponse myUserResponse = commonBs.getMyUserInfo(mozidoTrxRequest, null);
             if(myUserResponse != null)
             {
@@ -212,20 +203,13 @@ public class ScheduledRecurrentPaymentBs {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(ApiResponse.error(404, "User not Found"));
             }
-        }
-        else
-        {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.error(400, "Tenant "+mozidoTrxRequest.getTenantName()+" NOT ALLOWED"));
-        }
 
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     public ResponseEntity<ApiResponse<ScheduledRecurrentPaymentResponse>> get(MozidoTrxRequest mozidoTrxRequest, long id) throws ControllerException, ParseException, JsonProcessingException {
 
-        if(mozidoTrxRequest.getTenantName().equals(CATHOLIC_TENANT))
-        {
+
             GetMyUserResponse myUserResponse = commonBs.getMyUserInfo(mozidoTrxRequest, null);
             if(myUserResponse != null)
             {
@@ -270,24 +254,12 @@ public class ScheduledRecurrentPaymentBs {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(ApiResponse.error(404, "User not Found"));
             }
-        }
-        else
-        {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.error(400, "Tenant "+mozidoTrxRequest.getTenantName()+" NOT ALLOWED"));
-        }
 
     }
 
     public Page<ScheduledRecurrentPayment> findByFilters(MozidoTrxRequest mozidoTrxRequest, ScheduledRecurrentPaymentFilter filter, Pageable pageable) {
-        if(mozidoTrxRequest.getTenantName().equals(CATHOLIC_TENANT))
-        {
             return scheduledRecurrentPaymentFilterRepository.findByFilters(filter, pageable);
-        }
-        else
-        {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tenant "+mozidoTrxRequest.getTenantName()+" NOT ALLOWED");
-        }
+
     }
 
 
